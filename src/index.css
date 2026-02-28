@@ -1,0 +1,78 @@
+:root {
+  /* Christmas Palette */
+  --red: #C41E3A;
+  --red-dark: #8B1A2B;
+  --green: #1B5E20;
+  --green-light: #2E7D32;
+  --gold: #D4A017;
+  --gold-light: #F0D06E;
+  --cream: #FFF8E7;
+  --snow: #FAFAFA;
+
+  /* Semantic mappings */
+  --bg-primary: #0F1A0F;
+  --bg-secondary: #162016;
+  --bg-card: #1A261A;
+  --text-primary: var(--cream);
+  --text-secondary: #b8c9a8;
+  --accent: var(--gold);
+  --border: #2E4A2E;
+
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: var(--gold);
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: var(--gold-light);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.25s, background-color 0.25s;
+}
+
+button:hover {
+  border-color: var(--gold);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}

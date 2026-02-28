@@ -1,0 +1,84 @@
+.app {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--cream);
+  padding: 20px;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.app-header h1 {
+  font-size: 2.5em;
+  margin: 0 0 10px 0;
+  color: var(--gold);
+}
+
+.app-header p {
+  font-size: 1.1em;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.app-content {
+  display: grid;
+  grid-template-columns: 600px 600px 1fr;
+  gap: 20px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.canvas-section,
+.viewer-section,
+.controls-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-section h2,
+.viewer-section h2 {
+  font-size: 1.3em;
+  margin: 0 0 15px 0;
+  color: var(--cream);
+}
+
+.controls-section {
+  min-width: 280px;
+}
+
+@media (max-width: 1400px) {
+  .app-content {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+
+  .canvas-section,
+  .viewer-section {
+    width: 100%;
+  }
+
+  .controls-section {
+    width: 100%;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green-light);
+}
