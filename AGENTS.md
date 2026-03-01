@@ -1,0 +1,1 @@
+create a react app with vite and typescript,

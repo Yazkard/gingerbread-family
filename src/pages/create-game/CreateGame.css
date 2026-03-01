@@ -1,0 +1,152 @@
+.create-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    padding: 2rem;
+    color: var(--cream);
+}
+
+.create-card {
+    background-color: var(--bg-secondary);
+    padding: 2.5rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border);
+}
+
+.create-card h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    color: var(--gold);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-primary);
+    color: var(--cream);
+    font-size: 1rem;
+}
+
+.form-group input[type="text"]:focus {
+    outline: none;
+    border-color: var(--green-primary);
+}
+
+.member-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: var(--danger-text, #ff6b6b);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+}
+
+.add-member-btn {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--text-secondary);
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+}
+
+.add-member-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--cream);
+}
+
+.generate-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--green-primary);
+    color: var(--cream);
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.2s;
+}
+
+.generate-btn:hover {
+    background-color: var(--green-light);
+}
+
+.link-result {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.link-box {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.link-box input {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 6px 0 0 6px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.link-box button {
+    padding: 0.75rem 1rem;
+    background-color: var(--gold);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 0 6px 6px 0;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.join-game-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: transparent;
+    border: 2px solid var(--green-primary);
+    color: var(--green-primary);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.join-game-btn:hover {
+    background-color: var(--green-primary);
+    color: var(--cream);
+}
