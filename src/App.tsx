@@ -8,7 +8,7 @@ function App() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/create" component={CreateGame} />
-      <Route path="/game" component={GameLobby} />
+      <Route path="/game/:gameId" component={GameLobby} />
     </Switch>
   );
 }

@@ -1,51 +1,77 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { ModelCreator } from '../../model-creator/ModelCreator';
+import { getGameFromDb, type Game } from '../../lib/firebase';
 import './GameLobby.css';
 
-export function GameLobby() {
-    const [location] = useLocation();
+export function GameLobby({ params }: { params: { gameId: string } }) {
+    const { gameId } = params;
+    const [, setLocation] = useLocation();
 
-    // Initialize state directly from current URL
-    const [gameName, setGameName] = useState<string>(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        return searchParams.get('name') || '';
-    });
-
-    const [members, setMembers] = useState<string[]>(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        const membersParam = searchParams.get('members');
-        return membersParam ? membersParam.split(',') : [];
-    });
-
+    const [game, setGame] = useState<Game | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [currentUser, setCurrentUser] = useState<string | null>(null);
 
-    // Still want to update if location changes via navigation while on the page
+    // Fetch the game from Firebase
     useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        const nameParam = searchParams.get('name');
-        const membersParam = searchParams.get('members');
-
-        if (nameParam && nameParam !== gameName) setGameName(nameParam);
-        if (membersParam) {
-            const newMembers = membersParam.split(',');
-            if (newMembers.join(',') !== members.join(',')) {
-                setMembers(newMembers);
+        async function loadGame() {
+            try {
+                if (!gameId) {
+                    setError("No game ID provided.");
+                    return;
+                }
+                const gameData = await getGameFromDb(gameId);
+                if (gameData) {
+                    setGame(gameData);
+                } else {
+                    setError("Game not found.");
+                }
+            } catch (err) {
+                console.error("Error loading game:", err);
+                setError("Failed to load game data.");
+            } finally {
+                setIsLoading(false);
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location]);
+
+        loadGame();
+    }, [gameId]);
+
+    if (isLoading) {
+        return (
+            <div className="lobby-container">
+                <div className="lobby-card">
+                    <h2>Loading Game...</h2>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !game) {
+        return (
+            <div className="lobby-container">
+                <div className="lobby-card">
+                    <h2>Oops!</h2>
+                    <p className="error-text">{error || "Game not found."}</p>
+                    <button className="member-btn" onClick={() => setLocation('/')}>
+                        Go Home
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (!currentUser) {
         return (
             <div className="lobby-container">
                 <div className="lobby-card">
-                    <h2>Welcome to {gameName || 'Gingerbread Creator'}</h2>
+                    <h2>Welcome to {game.name}</h2>
                     <p>Please select who you are to start baking:</p>
 
                     <div className="members-list">
-                        {members.length > 0 ? (
-                            members.map((member, idx) => (
+                        {game.members && game.members.length > 0 ? (
+                            game.members.map((member, idx) => (
                                 <button
                                     key={idx}
                                     className="member-btn"
@@ -63,12 +89,14 @@ export function GameLobby() {
         );
     }
 
-    // Once a user is selected, render the main ModelCreator
-    // We pass down the currentUser and gameName as props
+    // Pass down the currentUser, gameName, AND gameId to ModelCreator
+    // ModelCreator will be responsible for fetching/saving their specific strokes
     return (
         <ModelCreator
             currentUser={currentUser}
-            gameName={gameName}
+            gameName={game.name}
+            gameId={gameId}
+            initialProject={game.projects?.[currentUser]}
         />
     );
 }

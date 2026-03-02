@@ -4,17 +4,21 @@ import { Viewer3D } from './components/Viewer3D';
 import { Controls } from './components/Controls';
 import type { Stroke } from './types';
 import { exportTo3MF } from './utils/export3MF';
+import { saveProjectToDb, type GameProject } from '../lib/firebase';
 import * as THREE from 'three';
 import './ModelCreator.css';
 
 interface ModelCreatorProps {
     currentUser?: string;
     gameName?: string;
+    gameId?: string;
+    initialProject?: GameProject;
 }
 
-export function ModelCreator({ currentUser, gameName }: ModelCreatorProps) {
-    const [strokes, setStrokes] = useState<Stroke[]>([]);
-    const [color, setColor] = useState('#d2691e'); // Gingerbread color
+export function ModelCreator({ currentUser, gameName, gameId, initialProject }: ModelCreatorProps) {
+    const [strokes, setStrokes] = useState<Stroke[]>(initialProject?.strokes || []);
+    const [color, setColor] = useState(initialProject?.color || '#d2691e'); // Gingerbread color
+    const [isSaving, setIsSaving] = useState(false);
 
     // Geometry Settings (Fixed as requested)
     const [extrusionDepth] = useState(4);
@@ -26,8 +30,10 @@ export function ModelCreator({ currentUser, gameName }: ModelCreatorProps) {
     const [currentGeometries, setCurrentGeometries] = useState<THREE.BufferGeometry[]>([]);
 
     const handleClear = useCallback(() => {
-        setStrokes([]);
-        setCurrentGeometries([]);
+        if (window.confirm("Are you sure you want to clear your drawing?")) {
+            setStrokes([]);
+            setCurrentGeometries([]);
+        }
     }, []);
 
     const handleExport3MF = useCallback(async () => {
@@ -37,14 +43,45 @@ export function ModelCreator({ currentUser, gameName }: ModelCreatorProps) {
         }
     }, [currentGeometries, currentUser]);
 
+    const handleSaveProgress = async () => {
+        if (!gameId || !currentUser) return;
+        setIsSaving(true);
+        try {
+            await saveProjectToDb(gameId, currentUser, {
+                strokes,
+                color,
+                updatedAt: new Date().toISOString()
+            });
+            alert("Progress saved!");
+        } catch (err) {
+            console.error("Error saving progress:", err);
+            alert("Failed to save progress.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div className="app">
             <header className="app-header">
-                <h1>{gameName || 'Gingerbread Architect'}</h1>
-                <p>
-                    {currentUser ? `Welcome ${currentUser}! ` : ''}
-                    Outline your shape, then add details!
-                </p>
+                <div className="header-content">
+                    <div>
+                        <h1>{gameName || 'Gingerbread Architect'}</h1>
+                        <p>
+                            {currentUser ? `Welcome ${currentUser}! ` : ''}
+                            Outline your shape, then add details!
+                        </p>
+                    </div>
+                    {gameId && currentUser && (
+                        <button
+                            className="save-btn"
+                            onClick={handleSaveProgress}
+                            disabled={isSaving}
+                        >
+                            {isSaving ? "Saving..." : "Save Progress"}
+                        </button>
+                    )}
+                </div>
             </header>
 
             <div className="app-content">

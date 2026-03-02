@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { createGameInDb, type Game } from '../../lib/firebase';
 import './CreateGame.css';
+
+// Simple fallback to generate unique IDs
+const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export function CreateGame() {
     const [, setLocation] = useLocation();
     const [gameName, setGameName] = useState('');
     const [members, setMembers] = useState<string[]>(['']);
     const [generatedLink, setGeneratedLink] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleMemberChange = (index: number, value: string) => {
         const newMembers = [...members];
@@ -24,7 +29,7 @@ export function CreateGame() {
         }
     };
 
-    const handleGenerateLink = (e: React.FormEvent) => {
+    const handleGenerateLink = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Filter out empty members
@@ -35,19 +40,38 @@ export function CreateGame() {
             return;
         }
 
-        const membersQuery = validMembers.map(encodeURIComponent).join(',');
-        const gameNameQuery = encodeURIComponent(gameName.trim());
+        setIsSaving(true);
+        try {
+            // 1. Generate an ID (e.g. smith-family-8x1f)
+            const sanitizedName = gameName.trim().toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const gameId = `${sanitizedName}-${generateId()}`;
 
-        // Generate full URL
-        const url = `${window.location.origin}/game?name=${gameNameQuery}&members=${membersQuery}`;
-        setGeneratedLink(url);
+            // 2. Prepare Game Document
+            const newGame: Game = {
+                name: gameName.trim(),
+                createdAt: new Date().toISOString(),
+                members: validMembers,
+                projects: {}, // Empty to start
+            };
+
+            // 3. Save to Firebase 
+            await createGameInDb(gameId, newGame);
+
+            // 4. Generate the simpler URL
+            const url = `${window.location.origin}/game/${gameId}`;
+            setGeneratedLink(url);
+        } catch (error) {
+            console.error("Error creating game:", error);
+            alert("Failed to create game connecting to Google Firebase. Did you set up the config?");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleGoToGame = () => {
         if (generatedLink) {
-            // Extract path and query from full URL to use with wouter
             const urlObj = new URL(generatedLink);
-            setLocation(urlObj.pathname + urlObj.search);
+            setLocation(urlObj.pathname);
         }
     };
 
@@ -66,6 +90,7 @@ export function CreateGame() {
                             onChange={(e) => setGameName(e.target.value)}
                             placeholder="e.g. Smith Family Gingerbread"
                             required
+                            disabled={isSaving}
                         />
                     </div>
 
@@ -79,12 +104,14 @@ export function CreateGame() {
                                     onChange={(e) => handleMemberChange(index, e.target.value)}
                                     placeholder={`Member ${index + 1}`}
                                     required={index === 0}
+                                    disabled={isSaving}
                                 />
                                 {members.length > 1 && (
                                     <button
                                         type="button"
                                         className="remove-btn"
                                         onClick={() => removeMemberField(index)}
+                                        disabled={isSaving}
                                     >
                                         ✕
                                     </button>
@@ -95,13 +122,14 @@ export function CreateGame() {
                             type="button"
                             className="add-member-btn"
                             onClick={addMemberField}
+                            disabled={isSaving}
                         >
                             + Add Member
                         </button>
                     </div>
 
-                    <button type="submit" className="generate-btn">
-                        Generate Game Link
+                    <button type="submit" className="generate-btn" disabled={isSaving}>
+                        {isSaving ? 'Creating in Database...' : 'Generate Game Link'}
                     </button>
                 </form>
 
