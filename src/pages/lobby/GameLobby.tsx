@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { ModelCreator } from '../../model-creator/ModelCreator';
+import { ModelCreator } from '../model-creator/ModelCreator';
 import { getGameFromDb, type Game } from '../../lib/firebase';
 import './GameLobby.css';
 

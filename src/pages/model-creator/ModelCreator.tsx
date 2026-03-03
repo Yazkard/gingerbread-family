@@ -4,7 +4,7 @@ import { Viewer3D } from './components/Viewer3D';
 import { Controls } from './components/Controls';
 import type { Stroke } from './types';
 import { exportTo3MF } from './utils/export3MF';
-import { saveProjectToDb, type GameProject } from '../lib/firebase';
+import { saveProjectToDb, type GameProject } from '../../lib/firebase';
 import * as THREE from 'three';
 import './ModelCreator.css';
 
