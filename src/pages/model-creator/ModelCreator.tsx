@@ -50,12 +50,33 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
             await saveProjectToDb(gameId, currentUser, {
                 strokes,
                 color,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                status: 'in_progress'
             });
             alert("Progress saved!");
         } catch (err) {
             console.error("Error saving progress:", err);
             alert("Failed to save progress.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleFinishSubmit = async () => {
+        if (!gameId || !currentUser) return;
+        if (!window.confirm("Are you sure you want to finish and submit? You can still edit it later if you want.")) return;
+        setIsSaving(true);
+        try {
+            await saveProjectToDb(gameId, currentUser, {
+                strokes,
+                color,
+                updatedAt: new Date().toISOString(),
+                status: 'completed'
+            });
+            alert("Model submitted as completed!");
+        } catch (err) {
+            console.error("Error submitting model:", err);
+            alert("Failed to submit model.");
         } finally {
             setIsSaving(false);
         }
@@ -73,13 +94,23 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                         </p>
                     </div>
                     {gameId && currentUser && (
-                        <button
-                            className="save-btn"
-                            onClick={handleSaveProgress}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? "Saving..." : "Save Progress"}
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                className="save-btn"
+                                onClick={handleSaveProgress}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? "Saving..." : "Save Progress"}
+                            </button>
+                            <button
+                                className="save-btn"
+                                onClick={handleFinishSubmit}
+                                disabled={isSaving || strokes.length === 0}
+                                style={{ background: '#4CAF50' }}
+                            >
+                                {isSaving ? "Submitting..." : "Finish & Submit"}
+                            </button>
+                        </div>
                     )}
                 </div>
             </header>

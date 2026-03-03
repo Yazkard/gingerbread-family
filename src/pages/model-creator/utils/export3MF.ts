@@ -135,3 +135,117 @@ ${trianglesXML}        </triangles>
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+export async function generate3MFBlob(geometries: THREE.BufferGeometry[]): Promise<Blob | null> {
+  if (geometries.length === 0) return null;
+  const { positions, triangleCount } = mergeGeometries(geometries);
+  if (triangleCount === 0) return null;
+
+  const vertexMap = new Map<string, number>();
+  const uniqueVertices: number[] = [];
+  const triangleIndices: number[] = [];
+
+  for (let i = 0; i < positions.length; i += 3) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const z = positions[i + 2];
+    const key = `${x.toFixed(6)},${y.toFixed(6)},${z.toFixed(6)}`;
+
+    let vertexIndex = vertexMap.get(key);
+    if (vertexIndex === undefined) {
+      vertexIndex = uniqueVertices.length / 3;
+      vertexMap.set(key, vertexIndex);
+      uniqueVertices.push(x, y, z);
+    }
+    triangleIndices.push(vertexIndex);
+  }
+
+  let verticesXML = '';
+  for (let i = 0; i < uniqueVertices.length; i += 3) {
+    verticesXML += `        <vertex x="${uniqueVertices[i].toFixed(6)}" y="${uniqueVertices[i + 1].toFixed(6)}" z="${uniqueVertices[i + 2].toFixed(6)}" />\n`;
+  }
+
+  let trianglesXML = '';
+  for (let i = 0; i < triangleIndices.length; i += 3) {
+    trianglesXML += `        <triangle v1="${triangleIndices[i]}" v2="${triangleIndices[i + 1]}" v3="${triangleIndices[i + 2]}" />\n`;
+  }
+
+  const modelXML = `<?xml version="1.0" encoding="UTF-8"?>
+<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">
+  <resources>
+    <object id="1" type="model">
+      <mesh>
+        <vertices>
+${verticesXML}        </vertices>
+        <triangles>
+${trianglesXML}        </triangles>
+      </mesh>
+    </object>
+  </resources>
+  <build>
+    <item objectid="1" />
+  </build>
+</model>`;
+
+  const contentTypesXML = `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
+  <Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml" />
+</Types>`;
+
+  const relsXML = `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel" />
+</Relationships>`;
+
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', contentTypesXML);
+  zip.file('_rels/.rels', relsXML);
+  zip.file('3D/3dmodel.model', modelXML);
+
+  return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml' });
+}
+
+import { buildGeometries } from './geometryBuilder';
+import { type Game } from '../../../lib/firebase';
+
+export async function exportAllToZip(game: Game, gameName: string): Promise<void> {
+  const zip = new JSZip();
+  let addedFiles = 0;
+
+  for (const [memberName, project] of Object.entries(game.projects || {})) {
+    if (project.strokes && project.strokes.length > 0) {
+      // Default settings used in ModelCreator:
+      // extrusionDepth: 4, strokeWidth: 1, detailStrokeWidth: 1 (handled in geometry builder via stored width), 
+      // outerExpansion: 3, innerGap: 2
+      const { geometries } = buildGeometries(project.strokes, {
+        color: project.color || '#d2691e',
+        extrusionDepth: 4,
+        strokeWidth: 1,
+        outerExpansion: 3,
+        innerGap: 2
+      });
+
+      const blob = await generate3MFBlob(geometries);
+      if (blob) {
+        zip.file(`${memberName}_gingerbread.3mf`, blob);
+        addedFiles++;
+      }
+    }
+  }
+
+  if (addedFiles === 0) {
+    alert("No models found to export.");
+    return;
+  }
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(zipBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_all_models.zip`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}

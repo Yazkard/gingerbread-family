@@ -1,6 +1,6 @@
 // src/lib/firebase.ts
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -23,6 +23,7 @@ export interface GameProject {
     strokes: any[];
     color: string;
     updatedAt: string;
+    status?: 'in_progress' | 'completed';
 }
 
 export interface Game {
