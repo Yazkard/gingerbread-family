@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Link } from 'wouter';
 import { DrawingCanvas } from './components/DrawingCanvas';
 import { Viewer3D } from './components/Viewer3D';
 import { Controls } from './components/Controls';
@@ -93,6 +94,9 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                             Outline your shape, then add details!
                         </p>
                     </div>
+                    {!gameId && (
+                        <Link href="/">← Back to Home</Link>
+                    )}
                     {gameId && currentUser && (
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button

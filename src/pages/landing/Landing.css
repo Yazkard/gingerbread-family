@@ -24,7 +24,7 @@
 }
 
 .primary-button {
-  background-color: var(--green-primary);
+  background-color: var(--green);
   color: var(--cream);
   font-size: 1.25rem;
   padding: 1rem 2rem;
@@ -41,5 +41,33 @@
 }
 
 .primary-button:active {
+  transform: translateY(0);
+}
+
+.landing-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.secondary-button {
+  background-color: transparent;
+  color: var(--cream);
+  font-size: 1.25rem;
+  padding: 1rem 2rem;
+  border: 2px solid var(--cream);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.secondary-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.secondary-button:active {
   transform: translateY(0);
 }

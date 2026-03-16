@@ -13,6 +13,9 @@ export function Landing() {
                 <Link href="/create">
                     <button className="primary-button">Create New Game</button>
                 </Link>
+                <Link href="/draw">
+                    <button className="secondary-button">Quick Draw</button>
+                </Link>
             </div>
         </div>
     );
