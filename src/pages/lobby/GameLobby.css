@@ -38,7 +38,7 @@
 
 .member-btn {
     background-color: transparent;
-    border: 2px solid var(--green-primary);
+    border: 2px solid var(--green);
     color: var(--cream);
     padding: 1rem;
     font-size: 1.2rem;
@@ -48,7 +48,7 @@
 }
 
 .member-btn:hover {
-    background-color: var(--green-primary);
+    background-color: var(--green);
     transform: translateY(-2px);
 }
 
