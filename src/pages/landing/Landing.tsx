@@ -5,6 +5,7 @@ export function Landing() {
     return (
         <div className="landing-container">
             <header className="landing-header">
+                <span className="landing-icon">🫚</span>
                 <h1>Gingerbread Architect</h1>
                 <p>Design and customize a family of 3D printable gingerbread characters together.</p>
             </header>

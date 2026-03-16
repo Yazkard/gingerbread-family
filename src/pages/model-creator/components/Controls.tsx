@@ -19,7 +19,7 @@ const SliderControl: React.FC<{
     step: number;
 }> = ({ label, value, onChange, min, max, step }) => (
     <div style={{ marginBottom: '15px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', color: '#b8c9a8', fontSize: '14px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', color: '#C4A882', fontSize: '14px' }}>
             {label}: {value.toFixed(1)}mm
         </label>
         <input
@@ -46,18 +46,18 @@ export const Controls: React.FC<ControlsProps> = ({
     return (
         <div style={{
             padding: '20px',
-            background: '#1A261A',
-            borderRadius: '8px',
-            border: '2px solid #2E4A2E',
+            background: 'rgba(30, 17, 9, 0.9)',
+            borderRadius: '12px',
+            border: '1px solid rgba(212,160,23,0.2)',
             color: '#FFF8E7',
             display: 'flex',
             flexDirection: 'column',
             gap: '15px',
         }}>
-            <h2 style={{ marginTop: 0, marginBottom: '20px', color: '#F0D06E' }}>Baking Controls</h2>
+            <h2 style={{ marginTop: 0, marginBottom: '10px', color: '#F0D06E', fontSize: '1.1em', letterSpacing: '0.02em' }}>Baking Controls</h2>
 
             <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#b8c9a8', fontSize: '14px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#C4A882', fontSize: '14px' }}>
                     Gingerbread Color
                 </label>
                 <input
@@ -68,7 +68,7 @@ export const Controls: React.FC<ControlsProps> = ({
                         width: '100%',
                         height: '40px',
                         border: 'none',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         cursor: 'pointer',
                     }}
                 />
@@ -81,21 +81,25 @@ export const Controls: React.FC<ControlsProps> = ({
                 min={1} max={4} step={0.1}
             />
 
-            <div style={{ height: '1px', background: '#2E4A2E', margin: '10px 0' }} />
+            <div style={{ height: '1px', background: '#4A2E1A', margin: '4px 0' }} />
 
             <button
                 onClick={onClear}
                 style={{
                     width: '100%',
                     padding: '12px',
-                    background: '#C41E3A',
-                    color: '#FFF8E7',
-                    border: 'none',
-                    borderRadius: '4px',
+                    background: 'transparent',
+                    color: '#ff6b6b',
+                    border: '1px solid rgba(196,30,58,0.5)',
+                    borderRadius: '10px',
                     cursor: 'pointer',
                     fontSize: '14px',
                     fontWeight: '500',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
                 }}
+                onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,30,58,0.15)'; }}
+                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
             >
                 Clear Canvas
             </button>
@@ -106,18 +110,23 @@ export const Controls: React.FC<ControlsProps> = ({
                 style={{
                     width: '100%',
                     padding: '12px',
-                    background: canExport ? '#2E7D32' : '#2E4A2E',
+                    background: canExport
+                        ? 'linear-gradient(135deg, #8B4513 0%, #D4A017 100%)'
+                        : 'rgba(74,46,26,0.4)',
                     color: '#FFF8E7',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: '10px',
                     cursor: canExport ? 'pointer' : 'not-allowed',
                     fontSize: '14px',
-                    fontWeight: '500',
+                    fontWeight: '600',
+                    fontFamily: 'inherit',
+                    opacity: canExport ? 1 : 0.5,
+                    boxShadow: canExport ? '0 4px 16px rgba(212,160,23,0.3)' : 'none',
+                    transition: 'opacity 0.2s, transform 0.15s',
                 }}
             >
-                Export
+                ↓ Export 3MF
             </button>
         </div>
     );
 };
-

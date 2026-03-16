@@ -89,7 +89,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                         {game.members && game.members.length > 0 ? (
                             game.members.map((member, idx) => {
                                 const project = game.projects?.[member];
-                                let statusText = 'Not Started';
+                                let statusText = 'Not started';
                                 let statusClass = 'status-not-started';
 
                                 if (project) {
@@ -97,7 +97,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                                         statusText = 'Completed';
                                         statusClass = 'status-completed';
                                     } else {
-                                        statusText = 'In Progress';
+                                        statusText = 'In progress';
                                         statusClass = 'status-in-progress';
                                     }
                                 }
@@ -106,13 +106,12 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                                     <button
                                         key={idx}
                                         className="member-btn"
-                                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '10px' }}
                                         onClick={() => setCurrentUser(member)}
                                     >
-                                        <span>{member}</span>
-                                        <span className={`status-badge ${statusClass}`} style={{ fontSize: '0.8em', padding: '4px 8px', borderRadius: '12px', background: 'rgba(0,0,0,0.1)' }}>
-                                            {statusText}
-                                        </span>
+                                        <span className="member-avatar">{member.charAt(0)}</span>
+                                        <span className="member-name">{member}</span>
+                                        <span className={`status-dot ${statusClass}`} title={statusText} />
+                                        <span className="status-label">{statusText}</span>
                                     </button>
                                 );
                             })
@@ -121,13 +120,13 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                         )}
                     </div>
 
-                    <div style={{ marginTop: '30px', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '20px' }}>
+                    <div className="bulk-export-section">
                         <button
+                            className="bulk-export-btn"
                             onClick={handleBulkExport}
                             disabled={isExporting || !game.projects || Object.keys(game.projects).length === 0}
-                            style={{ width: '100%', padding: '10px', background: '#2E4A2E', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: (isExporting || !game.projects || Object.keys(game.projects).length === 0) ? 0.5 : 1 }}
                         >
-                            {isExporting ? "Exporting..." : "Bulk Export Models (.zip)"}
+                            {isExporting ? "Exporting..." : "↓ Bulk Export Models (.zip)"}
                         </button>
                     </div>
                 </div>

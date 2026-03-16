@@ -1,24 +1,24 @@
 :root {
-  /* Christmas Palette */
+  /* Artisan Bakery Palette */
   --red: #C41E3A;
   --red-dark: #8B1A2B;
-  --green: #1B5E20;
-  --green-light: #2E7D32;
+  --green: #8B4513;
+  --green-light: #A0522D;
   --gold: #D4A017;
   --gold-light: #F0D06E;
   --cream: #FFF8E7;
   --snow: #FAFAFA;
 
   /* Semantic mappings */
-  --bg-primary: #0F1A0F;
-  --bg-secondary: #162016;
-  --bg-card: #1A261A;
+  --bg-primary: #150C07;
+  --bg-secondary: #1E1109;
+  --bg-card: #2A1810;
   --text-primary: var(--cream);
-  --text-secondary: #b8c9a8;
+  --text-secondary: #C4A882;
   --accent: var(--gold);
-  --border: #2E4A2E;
+  --border: #4A2E1A;
 
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -52,6 +52,10 @@ body {
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', Georgia, serif;
 }
 
 h1 {
