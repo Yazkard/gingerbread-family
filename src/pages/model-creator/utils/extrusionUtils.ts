@@ -344,9 +344,7 @@ export function createInsetFillGeometry(
     if (points.length < 3) return null;
 
     // Determine winding order to know which way is "in"
-    // In THREE.ShapeUtils, points are [x, y] arrays
-    const formattedPoints = points.map(p => [p.x, p.y]);
-    const isCW = THREE.ShapeUtils.isClockWise(formattedPoints as any);
+    const isCW = THREE.ShapeUtils.isClockWise(points as any);
 
     // In Three.js coordinate system (Y up):
     // CCW loop: Left normal points INWARD. (+distance)
@@ -514,6 +512,55 @@ export function normalizeStrokes(strokes: Point2D[][]): Point2D[][] {
         x: point.x - centroid.x,
         y: point.y - centroid.y,
     })));
+}
+
+/** Shoelace formula — zwraca podpisane pole */
+function computeSignedArea(pts: Point2D[]): number {
+    let area = 0;
+    const n = pts.length;
+    for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+    }
+    return area / 2;
+}
+
+/**
+ * Usuwa self-intersections z zamkniętej ścieżki zachowując pętlę o największym polu.
+ * Dla ścieżek otwartych zwraca bez zmian.
+ */
+export function resolvePathSelfIntersections(points: Point2D[]): Point2D[] {
+    if (points.length < 4) return points;
+    const isClosed = isPointNear(points[0], points[points.length - 1], 1.0);
+    if (!isClosed) return points;
+
+    let path = [...points];
+    let iterations = 50;
+
+    while (iterations-- > 0) {
+        const n = path.length;
+        let found = false;
+
+        outerLoop:
+        for (let i = 0; i < n - 2; i++) {
+            for (let j = i + 2; j < n - 1; j++) {
+                if (i === 0 && j === n - 2) continue; // shared closing point
+                const inter = lineIntersect(path[i], path[i + 1], path[j], path[j + 1]);
+                if (inter) {
+                    const loop1 = [...path.slice(0, i + 1), inter.point, ...path.slice(j + 1)];
+                    const loop2 = [inter.point, ...path.slice(i + 1, j + 1), inter.point];
+                    path = Math.abs(computeSignedArea(loop1)) >= Math.abs(computeSignedArea(loop2))
+                        ? loop1 : loop2;
+                    found = true;
+                    break outerLoop;
+                }
+            }
+        }
+
+        if (!found) break;
+    }
+
+    return path;
 }
 
 /**

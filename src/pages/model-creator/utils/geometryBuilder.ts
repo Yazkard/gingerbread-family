@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import React from 'react';
 import type { Stroke } from '../types';
-import { createRibbonGeometry, createInsetFillGeometry, clipPathToPolygon, getOffsetPoints } from './extrusionUtils';
+import { createRibbonGeometry, createInsetFillGeometry, clipPathToPolygon, getOffsetPoints, resolvePathSelfIntersections } from './extrusionUtils';
 
 export interface BuildGeometriesOptions {
     color: string;
@@ -34,12 +34,11 @@ export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptio
     const rimWidth = sWidth * 0.8;
 
     // --- STROKE 0 (The Main Base) ---
-    const basePoints = normalizedStrokes[0].points;
+    const basePoints = resolvePathSelfIntersections(normalizedStrokes[0].points);
 
     // Determine winding order for offset directions (Y up space)
-    const formattedPoints = basePoints.map(p => [p.x, p.y]);
     // @ts-ignore
-    const isCW = THREE.ShapeUtils.isClockWise(formattedPoints);
+    const isCW = THREE.ShapeUtils.isClockWise(basePoints);
 
     // 1. Outer Flange (Attached to outside)
     if (sOuterExp > 0) {
