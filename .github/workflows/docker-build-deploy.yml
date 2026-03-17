@@ -36,7 +36,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
+          tags: |@
             type=sha,prefix=sha-
             type=raw,value=latest
 
@@ -70,9 +70,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
-            # Log in to GitHub Container Registry
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
             # Pull the latest image
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
