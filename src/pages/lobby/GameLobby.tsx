@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n';
 import { ModelCreator } from '../model-creator/ModelCreator';
 import { db, type Game } from '../../lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';

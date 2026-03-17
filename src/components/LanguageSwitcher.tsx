@@ -1,13 +1,9 @@
-import { useTranslation } from 'react-i18next';
+import React from 'react';
+import { useTranslation } from '../i18n';
 
 export function LanguageSwitcher() {
     const { i18n } = useTranslation();
     const current = i18n.language;
-
-    const switchTo = (lang: string) => {
-        i18n.changeLanguage(lang);
-        localStorage.setItem('lang', lang);
-    };
 
     const btnBase: React.CSSProperties = {
         background: 'transparent',
@@ -34,13 +30,13 @@ export function LanguageSwitcher() {
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
             <button
                 style={current === 'pl' ? btnActive : btnBase}
-                onClick={() => switchTo('pl')}
+                onClick={() => i18n.changeLanguage('pl')}
             >
                 PL
             </button>
             <button
                 style={current === 'en' ? btnActive : btnBase}
-                onClick={() => switchTo('en')}
+                onClick={() => i18n.changeLanguage('en')}
             >
                 EN
             </button>

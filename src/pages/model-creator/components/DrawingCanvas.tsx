@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../i18n';
 import type { Point2D, Stroke } from '../types';
 import { isPointNear } from '../utils/extrusionUtils';
 

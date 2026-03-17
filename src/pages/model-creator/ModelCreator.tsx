@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'wouter';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n';
 import { DrawingCanvas } from './components/DrawingCanvas';
 import { Viewer3D } from './components/Viewer3D';
 import { Controls } from './components/Controls';

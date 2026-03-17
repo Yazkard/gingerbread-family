@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import './Landing.css';
 

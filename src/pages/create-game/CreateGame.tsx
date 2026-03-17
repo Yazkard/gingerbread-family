@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n';
 import { createGameInDb, type Game } from '../../lib/firebase';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import './CreateGame.css';
