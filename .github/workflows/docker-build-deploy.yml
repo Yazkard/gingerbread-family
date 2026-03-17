@@ -36,7 +36,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |@
+          tags: |
             type=sha,prefix=sha-
             type=raw,value=latest
 
