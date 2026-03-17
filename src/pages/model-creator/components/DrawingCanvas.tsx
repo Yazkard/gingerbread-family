@@ -33,7 +33,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw grid lines
-        ctx.strokeStyle = '#1B5E20';
+        ctx.strokeStyle = '#4A2E1A';
         ctx.lineWidth = 1;
         for (let i = 0; i <= CANVAS_SIZE; i += 50) {
             ctx.beginPath();
@@ -85,7 +85,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             if (isOuter && isCurrent) {
                 ctx.beginPath();
                 ctx.arc(points[0].x, points[0].y, 5, 0, Math.PI * 2);
-                ctx.fillStyle = '#00ff00';
+                ctx.fillStyle = '#D4A017';
                 ctx.fill();
             }
         };
@@ -101,7 +101,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         }
 
         // Add labels
-        ctx.fillStyle = '#666';
+        ctx.fillStyle = '#C4A882';
         ctx.font = '10px Arial';
         ctx.fillText('10cm', CANVAS_SIZE - 25, 12);
         ctx.fillText('10cm', 2, CANVAS_SIZE - 5);
@@ -147,7 +147,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             return;
         }
 
-        let finalPoints = [...currentStroke];
+        const finalPoints = [...currentStroke];
 
         if (strokes.length === 0) {
             const start = finalPoints[0];
@@ -185,10 +185,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
                 style={{
-                    border: '2px solid #2E4A2E',
+                    border: '2px solid #4A2E1A',
                     borderRadius: '4px',
                     cursor: 'crosshair',
-                    backgroundColor: '#0F1A0F',
+                    backgroundColor: '#150C07',
                     touchAction: 'none',
                     display: 'block'
                 }}
@@ -203,7 +203,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 borderRadius: '4px',
                 fontSize: '11px',
                 pointerEvents: 'none',
-                border: '1px solid #2E4A2E'
+                border: '1px solid #4A2E1A'
             }}>
                 {strokes.length === 0
                     ? 'Outline (Base Shape)'

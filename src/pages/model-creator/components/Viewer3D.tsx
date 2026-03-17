@@ -31,7 +31,7 @@ const SimpleGrid: React.FC<{ size: number; divisions: number; centerX: number; c
 
     return (
         <lineSegments geometry={geometry} position={[centerX, centerY, -1]}>
-            <lineBasicMaterial color="#1B5E20" transparent opacity={0.6} />
+            <lineBasicMaterial color="#4A2E1A" transparent opacity={0.6} />
         </lineSegments>
     );
 };
@@ -80,16 +80,18 @@ const SceneContent: React.FC<{
         onGeometriesReadyRef.current?.(geometries);
     }, [geometries]);
 
-    return <group>{meshes}</group>;
+    return (
+        <group>{meshes}</group>
+    );
 };
 
 export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
     return (
-        <div style={{ width: '600px', height: '600px', border: '2px solid #2E4A2E', borderRadius: '8px', overflow: 'hidden' }}>
+        <div style={{ width: '600px', height: '600px', border: '2px solid #4A2E1A', borderRadius: '8px', overflow: 'hidden' }}>
             <Canvas
                 shadows
                 camera={{ position: [50, -50, 150], fov: 50 }}
-                style={{ background: '#0F1A0F' }}
+                style={{ background: '#150C07' }}
             >
                 <ambientLight intensity={0.5} />
                 <directionalLight
