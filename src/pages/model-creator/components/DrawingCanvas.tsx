@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Point2D, Stroke } from '../types';
 import { isPointNear } from '../utils/extrusionUtils';
 
@@ -17,6 +18,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     strokeWidth,
     detailStrokeWidth
 }) => {
+    const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [currentStroke, setCurrentStroke] = useState<Point2D[]>([]);
@@ -103,9 +105,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         // Add labels
         ctx.fillStyle = '#C4A882';
         ctx.font = '10px Arial';
-        ctx.fillText('10cm', CANVAS_SIZE - 25, 12);
-        ctx.fillText('10cm', 2, CANVAS_SIZE - 5);
-    }, [strokes, isDrawing, currentStroke, color, detailStrokeWidth]);
+        ctx.fillText(t('canvas.size'), CANVAS_SIZE - 25, 12);
+        ctx.fillText(t('canvas.size'), 2, CANVAS_SIZE - 5);
+    }, [strokes, isDrawing, currentStroke, color, detailStrokeWidth, t]);
 
     const getPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point2D => {
         const canvas = canvasRef.current!;
@@ -206,8 +208,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 border: '1px solid #4A2E1A'
             }}>
                 {strokes.length === 0
-                    ? 'Outline (Base Shape)'
-                    : 'Detail (Clipped to base)'}
+                    ? t('canvas.outlineMode')
+                    : t('canvas.detailMode')}
             </div>
         </div>
     );

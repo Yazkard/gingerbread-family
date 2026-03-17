@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ControlsProps {
     color: string;
@@ -43,6 +44,8 @@ export const Controls: React.FC<ControlsProps> = ({
     onExport3MF,
     canExport,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <div style={{
             padding: '20px',
@@ -54,11 +57,13 @@ export const Controls: React.FC<ControlsProps> = ({
             flexDirection: 'column',
             gap: '15px',
         }}>
-            <h2 style={{ marginTop: 0, marginBottom: '10px', color: '#F0D06E', fontSize: '1.1em', letterSpacing: '0.02em' }}>Baking Controls</h2>
+            <h2 style={{ marginTop: 0, marginBottom: '10px', color: '#F0D06E', fontSize: '1.1em', letterSpacing: '0.02em' }}>
+                {t('controls.heading')}
+            </h2>
 
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#C4A882', fontSize: '14px' }}>
-                    Gingerbread Color
+                    {t('controls.colorLabel')}
                 </label>
                 <input
                     type="color"
@@ -75,7 +80,7 @@ export const Controls: React.FC<ControlsProps> = ({
             </div>
 
             <SliderControl
-                label="Detail Width"
+                label={t('controls.detailWidth')}
                 value={detailStrokeWidth}
                 onChange={onDetailStrokeWidthChange}
                 min={1} max={4} step={0.1}
@@ -101,7 +106,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,30,58,0.15)'; }}
                 onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
             >
-                Clear Canvas
+                {t('controls.clearCanvas')}
             </button>
 
             <button
@@ -125,7 +130,7 @@ export const Controls: React.FC<ControlsProps> = ({
                     transition: 'opacity 0.2s, transform 0.15s',
                 }}
             >
-                ↓ Export 3MF
+                {t('controls.export3MF')}
             </button>
         </div>
     );

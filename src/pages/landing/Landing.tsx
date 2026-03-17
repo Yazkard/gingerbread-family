@@ -1,21 +1,28 @@
 import { Link } from 'wouter';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import './Landing.css';
 
 export function Landing() {
+    const { t } = useTranslation();
+
     return (
         <div className="landing-container">
+            <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                <LanguageSwitcher />
+            </div>
             <header className="landing-header">
                 <span className="landing-icon">🫚</span>
-                <h1>Gingerbread Architect</h1>
-                <p>Design and customize a family of 3D printable gingerbread characters together.</p>
+                <h1>{t('landing.title')}</h1>
+                <p>{t('landing.subtitle')}</p>
             </header>
 
             <div className="landing-actions">
                 <Link href="/create">
-                    <button className="primary-button">Create New Game</button>
+                    <button className="primary-button">{t('landing.createGame')}</button>
                 </Link>
                 <Link href="/draw">
-                    <button className="secondary-button">Quick Draw</button>
+                    <button className="secondary-button">{t('landing.quickDraw')}</button>
                 </Link>
             </div>
         </div>

@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'wouter';
+import { useTranslation } from 'react-i18next';
 import { DrawingCanvas } from './components/DrawingCanvas';
 import { Viewer3D } from './components/Viewer3D';
 import { Controls } from './components/Controls';
 import type { Stroke } from './types';
 import { exportTo3MF } from './utils/export3MF';
 import { saveProjectToDb, type GameProject } from '../../lib/firebase';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import * as THREE from 'three';
 import './ModelCreator.css';
 
@@ -17,6 +19,7 @@ interface ModelCreatorProps {
 }
 
 export function ModelCreator({ currentUser, gameName, gameId, initialProject }: ModelCreatorProps) {
+    const { t } = useTranslation();
     const [strokes, setStrokes] = useState<Stroke[]>(initialProject?.strokes || []);
     const [color, setColor] = useState(initialProject?.color || '#d2691e'); // Gingerbread color
     const [isSaving, setIsSaving] = useState(false);
@@ -31,11 +34,11 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
     const [currentGeometries, setCurrentGeometries] = useState<THREE.BufferGeometry[]>([]);
 
     const handleClear = useCallback(() => {
-        if (window.confirm("Are you sure you want to clear your drawing?")) {
+        if (window.confirm(t('modelCreator.confirmClear'))) {
             setStrokes([]);
             setCurrentGeometries([]);
         }
-    }, []);
+    }, [t]);
 
     const handleExport3MF = useCallback(async () => {
         if (currentGeometries.length > 0) {
@@ -54,10 +57,10 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                 updatedAt: new Date().toISOString(),
                 status: 'in_progress'
             });
-            alert("Progress saved!");
+            alert(t('modelCreator.saved'));
         } catch (err) {
             console.error("Error saving progress:", err);
-            alert("Failed to save progress.");
+            alert(t('modelCreator.saveFailed'));
         } finally {
             setIsSaving(false);
         }
@@ -65,7 +68,7 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
 
     const handleFinishSubmit = async () => {
         if (!gameId || !currentUser) return;
-        if (!window.confirm("Are you sure you want to finish and submit? You can still edit it later if you want.")) return;
+        if (!window.confirm(t('modelCreator.confirmSubmit'))) return;
         setIsSaving(true);
         try {
             await saveProjectToDb(gameId, currentUser, {
@@ -74,10 +77,10 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                 updatedAt: new Date().toISOString(),
                 status: 'completed'
             });
-            alert("Model submitted as completed!");
+            alert(t('modelCreator.submitted'));
         } catch (err) {
             console.error("Error submitting model:", err);
-            alert("Failed to submit model.");
+            alert(t('modelCreator.submitFailed'));
         } finally {
             setIsSaving(false);
         }
@@ -88,40 +91,43 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
             <header className="app-header">
                 <div className="header-content">
                     <div>
-                        <h1>{gameName || 'Gingerbread Architect'}</h1>
+                        <h1>{gameName || t('landing.title')}</h1>
                         <p>
-                            {currentUser ? `Welcome ${currentUser}! ` : ''}
-                            Outline your shape, then add details!
+                            {currentUser ? t('modelCreator.welcome', { name: currentUser }) : ''}
+                            {t('modelCreator.instructions')}
                         </p>
                     </div>
-                    {!gameId && (
-                        <Link href="/">← Back to Home</Link>
-                    )}
-                    {gameId && currentUser && (
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button
-                                className="save-btn"
-                                onClick={handleSaveProgress}
-                                disabled={isSaving}
-                            >
-                                {isSaving ? "Saving..." : "Save Progress"}
-                            </button>
-                            <button
-                                className="save-btn"
-                                onClick={handleFinishSubmit}
-                                disabled={isSaving || strokes.length === 0}
-                                style={{ background: '#4CAF50' }}
-                            >
-                                {isSaving ? "Submitting..." : "Finish & Submit"}
-                            </button>
-                        </div>
-                    )}
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <LanguageSwitcher />
+                        {!gameId && (
+                            <Link href="/">{t('modelCreator.backHome')}</Link>
+                        )}
+                        {gameId && currentUser && (
+                            <>
+                                <button
+                                    className="save-btn"
+                                    onClick={handleSaveProgress}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? t('modelCreator.saving') : t('modelCreator.save')}
+                                </button>
+                                <button
+                                    className="save-btn"
+                                    onClick={handleFinishSubmit}
+                                    disabled={isSaving || strokes.length === 0}
+                                    style={{ background: '#4CAF50' }}
+                                >
+                                    {isSaving ? t('modelCreator.submitting') : t('modelCreator.finish')}
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </header>
 
             <div className="app-content">
                 <div className="canvas-section">
-                    <h2>2D Drawing</h2>
+                    <h2>{t('modelCreator.drawing2D')}</h2>
                     <DrawingCanvas
                         strokes={strokes}
                         onStrokesChange={setStrokes}
@@ -132,7 +138,7 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                 </div>
 
                 <div className="viewer-section">
-                    <h2>3D Preview</h2>
+                    <h2>{t('modelCreator.preview3D')}</h2>
                     <Viewer3D
                         strokes={strokes}
                         color={color}

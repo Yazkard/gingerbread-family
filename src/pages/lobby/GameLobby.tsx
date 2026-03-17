@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useTranslation } from 'react-i18next';
 import { ModelCreator } from '../model-creator/ModelCreator';
 import { db, type Game } from '../../lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { exportAllToZip } from '../model-creator/utils/export3MF';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import './GameLobby.css';
 
 export function GameLobby({ params }: { params: { gameId: string } }) {
+    const { t } = useTranslation();
     const { gameId } = params;
     const [, setLocation] = useLocation();
 
@@ -19,7 +22,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
     // Fetch the game from Firebase with realtime updates
     useEffect(() => {
         if (!gameId) {
-            setError("No game ID provided.");
+            setError(t('lobby.noGameId'));
             setIsLoading(false);
             return;
         }
@@ -29,17 +32,17 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                 setGame(docSnap.data() as Game);
                 setError(null);
             } else {
-                setError("Game not found.");
+                setError(t('lobby.gameNotFound'));
             }
             setIsLoading(false);
         }, (err) => {
             console.error("Error loading game:", err);
-            setError("Failed to load game data.");
+            setError(t('lobby.loadFailed'));
             setIsLoading(false);
         });
 
         return () => unsubscribe();
-    }, [gameId]);
+    }, [gameId, t]);
 
     const handleBulkExport = async () => {
         if (!game) return;
@@ -48,7 +51,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
             await exportAllToZip(game, game.name);
         } catch (err) {
             console.error("Failed to export:", err);
-            alert("Failed to export models.");
+            alert(t('lobby.exportFailed'));
         } finally {
             setIsExporting(false);
         }
@@ -58,7 +61,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
         return (
             <div className="lobby-container">
                 <div className="lobby-card">
-                    <h2>Loading Game...</h2>
+                    <h2>{t('lobby.loading')}</h2>
                 </div>
             </div>
         );
@@ -67,11 +70,14 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
     if (error || !game) {
         return (
             <div className="lobby-container">
+                <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                    <LanguageSwitcher />
+                </div>
                 <div className="lobby-card">
-                    <h2>Oops!</h2>
-                    <p className="error-text">{error || "Game not found."}</p>
+                    <h2>{t('lobby.error')}</h2>
+                    <p className="error-text">{error || t('lobby.gameNotFound')}</p>
                     <button className="member-btn" onClick={() => setLocation('/')}>
-                        Go Home
+                        {t('lobby.goHome')}
                     </button>
                 </div>
             </div>
@@ -81,23 +87,26 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
     if (!currentUser) {
         return (
             <div className="lobby-container">
+                <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                    <LanguageSwitcher />
+                </div>
                 <div className="lobby-card">
-                    <h2>Welcome to {game.name}</h2>
-                    <p>Please select who you are to start baking:</p>
+                    <h2>{t('lobby.welcome', { name: game.name })}</h2>
+                    <p>{t('lobby.selectWho')}</p>
 
                     <div className="members-list">
                         {game.members && game.members.length > 0 ? (
                             game.members.map((member, idx) => {
                                 const project = game.projects?.[member];
-                                let statusText = 'Not started';
+                                let statusText = t('lobby.notStarted');
                                 let statusClass = 'status-not-started';
 
                                 if (project) {
                                     if (project.status === 'completed') {
-                                        statusText = 'Completed';
+                                        statusText = t('lobby.completed');
                                         statusClass = 'status-completed';
                                     } else {
-                                        statusText = 'In progress';
+                                        statusText = t('lobby.inProgress');
                                         statusClass = 'status-in-progress';
                                     }
                                 }
@@ -116,7 +125,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                                 );
                             })
                         ) : (
-                            <p className="error-text">No members found for this game.</p>
+                            <p className="error-text">{t('lobby.noMembers')}</p>
                         )}
                     </div>
 
@@ -126,7 +135,7 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
                             onClick={handleBulkExport}
                             disabled={isExporting || !game.projects || Object.keys(game.projects).length === 0}
                         >
-                            {isExporting ? "Exporting..." : "↓ Bulk Export Models (.zip)"}
+                            {isExporting ? t('lobby.exporting') : t('lobby.bulkExport')}
                         </button>
                     </div>
                 </div>

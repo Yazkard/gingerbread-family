@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -86,8 +87,9 @@ const SceneContent: React.FC<{
 };
 
 export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
+    const { t } = useTranslation();
     return (
-        <div style={{ width: '600px', height: '600px', border: '2px solid #4A2E1A', borderRadius: '8px', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '600px', height: '600px', border: '2px solid #4A2E1A', borderRadius: '8px', overflow: 'hidden' }}>
             <Canvas
                 shadows
                 camera={{ position: [50, -50, 150], fov: 50 }}
@@ -128,7 +130,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
                     borderRadius: '8px',
                     textAlign: 'center',
                 }}>
-                    Draw a shape to see 3D preview
+                    {t('canvas.emptyState')}
                 </div>
             )}
         </div>

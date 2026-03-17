@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { useTranslation } from 'react-i18next';
 import { createGameInDb, type Game } from '../../lib/firebase';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import './CreateGame.css';
 
 // Simple fallback to generate unique IDs
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export function CreateGame() {
+    const { t } = useTranslation();
     const [, setLocation] = useLocation();
     const [gameName, setGameName] = useState('');
     const [members, setMembers] = useState<string[]>(['']);
@@ -36,7 +39,7 @@ export function CreateGame() {
         const validMembers = members.filter(m => m.trim().length > 0);
 
         if (gameName.trim() === '' || validMembers.length === 0) {
-            alert("Please enter a game name and at least one member.");
+            alert(t('createGame.validationError'));
             return;
         }
 
@@ -54,7 +57,7 @@ export function CreateGame() {
                 projects: {}, // Empty to start
             };
 
-            // 3. Save to Firebase 
+            // 3. Save to Firebase
             await createGameInDb(gameId, newGame);
 
             // 4. Generate the simpler URL
@@ -62,7 +65,7 @@ export function CreateGame() {
             setGeneratedLink(url);
         } catch (error) {
             console.error("Error creating game:", error);
-            alert("Failed to create game connecting to Google Firebase. Did you set up the config?");
+            alert(t('createGame.firebaseError'));
         } finally {
             setIsSaving(false);
         }
@@ -77,32 +80,35 @@ export function CreateGame() {
 
     return (
         <div className="create-container">
+            <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                <LanguageSwitcher />
+            </div>
             <div className="create-card">
-                <h2>Create a New Game</h2>
+                <h2>{t('createGame.heading')}</h2>
 
                 <form onSubmit={handleGenerateLink} className="create-form">
                     <div className="form-group">
-                        <label htmlFor="gameName">Game Name / Room Content:</label>
+                        <label htmlFor="gameName">{t('createGame.gameNameLabel')}</label>
                         <input
                             id="gameName"
                             type="text"
                             value={gameName}
                             onChange={(e) => setGameName(e.target.value)}
-                            placeholder="e.g. Smith Family Gingerbread"
+                            placeholder={t('createGame.gameNamePlaceholder')}
                             required
                             disabled={isSaving}
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Members:</label>
+                        <label>{t('createGame.membersLabel')}</label>
                         {members.map((member, index) => (
                             <div key={index} className="member-input-group">
                                 <input
                                     type="text"
                                     value={member}
                                     onChange={(e) => handleMemberChange(index, e.target.value)}
-                                    placeholder={`Member ${index + 1}`}
+                                    placeholder={t('createGame.memberPlaceholder', { index: index + 1 })}
                                     required={index === 0}
                                     disabled={isSaving}
                                 />
@@ -124,29 +130,29 @@ export function CreateGame() {
                             onClick={addMemberField}
                             disabled={isSaving}
                         >
-                            + Add Member
+                            {t('createGame.addMember')}
                         </button>
                     </div>
 
                     <button type="submit" className="generate-btn" disabled={isSaving}>
-                        {isSaving ? 'Creating in Database...' : 'Generate Game Link'}
+                        {isSaving ? t('createGame.generating') : t('createGame.generate')}
                     </button>
                 </form>
 
                 {generatedLink && (
                     <div className="link-result">
-                        <p>Share this link with your family/friends:</p>
+                        <p>{t('createGame.shareLabel')}</p>
                         <div className="link-box">
                             <input type="text" readOnly value={generatedLink} />
                             <button
                                 onClick={() => navigator.clipboard.writeText(generatedLink)}
-                                title="Copy to clipboard"
+                                title={t('createGame.copy')}
                             >
-                                Copy
+                                {t('createGame.copy')}
                             </button>
                         </div>
                         <button className="join-game-btn" onClick={handleGoToGame}>
-                            Join Game Now
+                            {t('createGame.joinNow')}
                         </button>
                     </div>
                 )}

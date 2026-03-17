@@ -17,9 +17,11 @@
     "@react-three/fiber": "^9.5.0",
     "earcut": "^3.0.2",
     "firebase": "^12.10.0",
+    "i18next": "^25.8.18",
     "jszip": "^3.10.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-i18next": "^16.5.8",
     "three": "^0.182.0",
     "wouter": "^3.9.0"
   },
