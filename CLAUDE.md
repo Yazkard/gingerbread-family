@@ -45,6 +45,7 @@ Tests are in `src/**/*.test.ts`, run with Vitest (`environment: node`). Currentl
 - Firestore stores games under `games/{gameId}` with `members[]` and `projects` map keyed by member name.
 - Each project holds `strokes`, `color`, `status`, and `updatedAt`.
 - Real-time sync via `onSnapshot`; each member edits their own sub-document independently.
+- If changes in database structure are needed communicate it to me
 
 **Tech stack:** React 19, TypeScript, Vite (rolldown), Three.js + React Three Fiber + Drei, Wouter, Firebase Firestore, JSZip, Earcut.
 

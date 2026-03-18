@@ -89,11 +89,12 @@ const SceneContent: React.FC<{
 export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
     const { t } = useTranslation();
     return (
-        <div style={{ position: 'relative', width: '600px', height: '600px', border: '2px solid #4A2E1A', borderRadius: '8px', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', border: '2px solid #4A2E1A', borderRadius: '8px', overflow: 'hidden', touchAction: 'none' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
             <Canvas
                 shadows
                 camera={{ position: [50, -50, 150], fov: 50 }}
-                style={{ background: '#150C07' }}
+                style={{ background: '#150C07', touchAction: 'none' }}
             >
                 <ambientLight intensity={0.5} />
                 <directionalLight
@@ -114,7 +115,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
                     dampingFactor={0.05}
                     target={[50, -50, 0]}
                     minDistance={20}
-                    maxDistance={300}
+                    maxDistance={500}
                 />
             </Canvas>
 
@@ -133,6 +134,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
                     {t('canvas.emptyState')}
                 </div>
             )}
+          </div>
         </div>
     );
 };

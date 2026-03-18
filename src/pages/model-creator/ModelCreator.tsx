@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useTranslation } from '../../i18n';
 import { DrawingCanvas } from './components/DrawingCanvas';
@@ -21,7 +21,7 @@ interface ModelCreatorProps {
 export function ModelCreator({ currentUser, gameName, gameId, initialProject }: ModelCreatorProps) {
     const { t } = useTranslation();
     const [strokes, setStrokes] = useState<Stroke[]>(initialProject?.strokes || []);
-    const [color, setColor] = useState(initialProject?.color || '#d2691e'); // Gingerbread color
+    const color = '#d2691e'; // Fixed gingerbread color
     const [isSaving, setIsSaving] = useState(false);
 
     // Geometry Settings (Fixed as requested)
@@ -33,12 +33,27 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
 
     const [currentGeometries, setCurrentGeometries] = useState<THREE.BufferGeometry[]>([]);
 
+    const handleUndo = useCallback(() => {
+        setStrokes(prev => prev.slice(0, -1));
+    }, []);
+
     const handleClear = useCallback(() => {
         if (window.confirm(t('modelCreator.confirmClear'))) {
             setStrokes([]);
             setCurrentGeometries([]);
         }
     }, [t]);
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                setStrokes(prev => prev.slice(0, -1));
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, []);
 
     const handleExport3MF = useCallback(async () => {
         if (currentGeometries.length > 0) {
@@ -153,10 +168,10 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
 
                 <div className="controls-section">
                     <Controls
-                        color={color}
-                        onColorChange={setColor}
                         detailStrokeWidth={detailStrokeWidth}
                         onDetailStrokeWidthChange={setDetailStrokeWidth}
+                        onUndo={handleUndo}
+                        canUndo={strokes.length > 0}
                         onClear={handleClear}
                         onExport3MF={handleExport3MF}
                         canExport={currentGeometries.length > 0}

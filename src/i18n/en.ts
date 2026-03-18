@@ -56,8 +56,8 @@ const en = {
     },
     controls: {
         heading: 'Baking Controls',
-        colorLabel: 'Gingerbread Color',
         detailWidth: 'Detail Width',
+        undo: 'Undo (Ctrl+Z)',
         clearCanvas: 'Clear Canvas',
         export3MF: '↓ Export 3MF',
     },

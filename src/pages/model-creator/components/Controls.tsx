@@ -2,10 +2,10 @@ import React from 'react';
 import { useTranslation } from '../../../i18n';
 
 interface ControlsProps {
-    color: string;
-    onColorChange: (color: string) => void;
     detailStrokeWidth: number;
     onDetailStrokeWidthChange: (width: number) => void;
+    onUndo: () => void;
+    canUndo: boolean;
     onClear: () => void;
     onExport3MF: () => void;
     canExport: boolean;
@@ -36,10 +36,10 @@ const SliderControl: React.FC<{
 );
 
 export const Controls: React.FC<ControlsProps> = ({
-    color,
-    onColorChange,
     detailStrokeWidth,
     onDetailStrokeWidthChange,
+    onUndo,
+    canUndo,
     onClear,
     onExport3MF,
     canExport,
@@ -61,24 +61,6 @@ export const Controls: React.FC<ControlsProps> = ({
                 {t('controls.heading')}
             </h2>
 
-            <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#C4A882', fontSize: '14px' }}>
-                    {t('controls.colorLabel')}
-                </label>
-                <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => onColorChange(e.target.value)}
-                    style={{
-                        width: '100%',
-                        height: '40px',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                    }}
-                />
-            </div>
-
             <SliderControl
                 label={t('controls.detailWidth')}
                 value={detailStrokeWidth}
@@ -87,6 +69,29 @@ export const Controls: React.FC<ControlsProps> = ({
             />
 
             <div style={{ height: '1px', background: '#4A2E1A', margin: '4px 0' }} />
+
+            <button
+                onClick={onUndo}
+                disabled={!canUndo}
+                style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: 'transparent',
+                    color: canUndo ? '#C4A882' : '#6B5040',
+                    border: '1px solid rgba(196,168,130,0.3)',
+                    borderRadius: '10px',
+                    cursor: canUndo ? 'pointer' : 'not-allowed',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
+                    opacity: canUndo ? 1 : 0.5,
+                }}
+                onMouseEnter={e => { if (canUndo) (e.target as HTMLButtonElement).style.background = 'rgba(196,168,130,0.1)'; }}
+                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
+            >
+                {t('controls.undo')}
+            </button>
 
             <button
                 onClick={onClear}

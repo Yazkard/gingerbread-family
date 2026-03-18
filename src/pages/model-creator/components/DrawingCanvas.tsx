@@ -109,25 +109,26 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         ctx.fillText(t('canvas.size'), 2, CANVAS_SIZE - 5);
     }, [strokes, isDrawing, currentStroke, color, detailStrokeWidth, t]);
 
-    const getPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point2D => {
+    const getPoint = (clientX: number, clientY: number): Point2D => {
         const canvas = canvasRef.current!;
         const rect = canvas.getBoundingClientRect();
-        // Clamp to 5cm box
+        const scaleX = CANVAS_SIZE / rect.width;
+        const scaleY = CANVAS_SIZE / rect.height;
         return {
-            x: Math.max(0, Math.min(CANVAS_SIZE, e.clientX - rect.left)),
-            y: Math.max(0, Math.min(CANVAS_SIZE, e.clientY - rect.top))
+            x: Math.max(0, Math.min(CANVAS_SIZE, (clientX - rect.left) * scaleX)),
+            y: Math.max(0, Math.min(CANVAS_SIZE, (clientY - rect.top) * scaleY))
         };
     };
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         setIsDrawing(true);
-        setCurrentStroke([getPoint(e)]);
+        setCurrentStroke([getPoint(e.clientX, e.clientY)]);
     };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
         if (!isDrawing) return;
 
-        const newPoint = getPoint(e);
+        const newPoint = getPoint(e.clientX, e.clientY);
         const lastPoint = currentStroke[currentStroke.length - 1];
 
         const dist = Math.sqrt(
@@ -138,6 +139,30 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         if (dist > 5) {
             setCurrentStroke(prev => [...prev, newPoint]);
         }
+    };
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        const touch = e.touches[0];
+        setIsDrawing(true);
+        setCurrentStroke([getPoint(touch.clientX, touch.clientY)]);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        const newPoint = getPoint(touch.clientX, touch.clientY);
+        const lastPoint = currentStroke[currentStroke.length - 1];
+        const dist = Math.sqrt(
+            Math.pow(newPoint.x - lastPoint.x, 2) +
+            Math.pow(newPoint.y - lastPoint.y, 2)
+        );
+        if (dist > 5) {
+            setCurrentStroke(prev => [...prev, newPoint]);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        handleMouseUp();
     };
 
     const handleMouseUp = () => {
@@ -177,7 +202,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     };
 
     return (
-        <div style={{ position: 'relative', width: CANVAS_SIZE, height: CANVAS_SIZE }}>
+        <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1' }}>
             <canvas
                 ref={canvasRef}
                 width={CANVAS_SIZE}
@@ -186,13 +211,18 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 style={{
                     border: '2px solid #4A2E1A',
                     borderRadius: '4px',
                     cursor: 'crosshair',
                     backgroundColor: '#150C07',
                     touchAction: 'none',
-                    display: 'block'
+                    display: 'block',
+                    width: '100%',
+                    height: '100%',
                 }}
             />
             <div style={{

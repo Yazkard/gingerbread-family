@@ -56,8 +56,8 @@ const pl = {
     },
     controls: {
         heading: 'Ustawienia',
-        colorLabel: 'Kolor piernika',
         detailWidth: 'Szerokość detalu',
+        undo: 'Cofnij (Ctrl+Z)',
         clearCanvas: 'Wyczyść',
         export3MF: '↓ Eksportuj 3MF',
     },
