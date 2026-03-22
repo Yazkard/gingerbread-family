@@ -21,7 +21,7 @@ function resolvePath(obj: Record<string, Record<string, string>>, path: string):
 
 function interpolate(str: string, vars?: Record<string, string | number>): string {
     if (!vars) return str;
-    return str.replace(/\{\{(\w+)\}\}/g, (_, key) => String(vars[key] ?? `{{${key}}}`));
+    return str.replace(/{{(\w+)}}/g, (_, key) => String(vars[key] ?? `{{${key}}}`));
 }
 
 interface I18nContextValue {
@@ -55,6 +55,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTranslation() {
     const ctx = useContext(I18nContext);
     if (!ctx) throw new Error('useTranslation must be used inside I18nProvider');

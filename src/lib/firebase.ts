@@ -1,6 +1,7 @@
 // src/lib/firebase.ts
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import type { Stroke } from '../pages/model-creator/types';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,7 +21,7 @@ export const db = getFirestore(app);
 
 // Helper functions for our models
 export interface GameProject {
-    strokes: any[];
+    strokes: Stroke[];
     color: string;
     updatedAt: string;
     status?: 'in_progress' | 'completed';
