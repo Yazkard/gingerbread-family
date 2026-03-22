@@ -60,12 +60,21 @@ const pl = {
         undo: 'Cofnij (Ctrl+Z)',
         clearCanvas: 'Wyczyść',
         export3MF: '↓ Eksportuj 3MF',
+        backgroundPhoto: 'Zdjęcie w tle',
+        uploadPhoto: 'Dodaj zdjęcie',
+        changePhoto: 'Zmień zdjęcie',
+        photoOpacity: 'Przezroczystość',
+        photoScale: 'Skala zdjęcia',
+        movePhoto: 'Przesuń zdjęcie',
+        movePhotoOn: 'Przesuwanie (WŁ.)',
+        removePhoto: 'Usuń zdjęcie',
     },
     canvas: {
         outlineMode: 'Obrys (Kształt bazowy)',
         detailMode: 'Detal (Przycinany do obrysu)',
         emptyState: 'Narysuj kształt, żeby zobaczyć podgląd 3D',
         size: '10cm',
+        movePhotoMode: 'Przesuwanie zdjęcia',
     },
 } as const;
 

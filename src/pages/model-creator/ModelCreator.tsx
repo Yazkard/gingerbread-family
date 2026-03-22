@@ -4,7 +4,7 @@ import { useTranslation } from '../../i18n';
 import { DrawingCanvas } from './components/DrawingCanvas';
 import { Viewer3D } from './components/Viewer3D';
 import { Controls } from './components/Controls';
-import type { Stroke } from './types';
+import type { Stroke, BackgroundImage } from './types';
 import { exportTo3MF } from './utils/export3MF';
 import { saveProjectToDb, type GameProject } from '../../lib/firebase';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
@@ -32,6 +32,9 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
     const [innerGap] = useState(2); // 2mm Gap
 
     const [currentGeometries, setCurrentGeometries] = useState<THREE.BufferGeometry[]>([]);
+    const [detailStartIndex, setDetailStartIndex] = useState(0);
+    const [backgroundImage, setBackgroundImage] = useState<BackgroundImage | null>(null);
+    const [isMoveMode, setIsMoveMode] = useState(false);
 
     const handleUndo = useCallback(() => {
         setStrokes(prev => prev.slice(0, -1));
@@ -43,6 +46,44 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
             setCurrentGeometries([]);
         }
     }, [t]);
+
+    const handleBackgroundUpload = useCallback((file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target?.result as string;
+            if (!dataUrl) return;
+            const img = new window.Image();
+            img.onload = () => {
+                const MAX = 2000;
+                let finalDataUrl = dataUrl;
+                if (img.naturalWidth > MAX || img.naturalHeight > MAX) {
+                    const canvas = document.createElement('canvas');
+                    const ratio = Math.min(MAX / img.naturalWidth, MAX / img.naturalHeight);
+                    canvas.width = img.naturalWidth * ratio;
+                    canvas.height = img.naturalHeight * ratio;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    finalDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                }
+                const fitScale = Math.min(500 / img.naturalWidth, 500 / img.naturalHeight, 1.0);
+                setBackgroundImage({
+                    dataUrl: finalDataUrl,
+                    x: 250,
+                    y: 250,
+                    scale: fitScale,
+                    opacity: 0.3,
+                });
+                setIsMoveMode(false);
+            };
+            img.src = dataUrl;
+        };
+        reader.readAsDataURL(file);
+    }, []);
+
+    const handleBackgroundRemove = useCallback(() => {
+        setBackgroundImage(null);
+        setIsMoveMode(false);
+    }, []);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -58,9 +99,9 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
     const handleExport3MF = useCallback(async () => {
         if (currentGeometries.length > 0) {
             const filename = currentUser ? `${currentUser}_gingerbread.3mf` : 'gingerbread.3mf';
-            await exportTo3MF(currentGeometries, filename);
+            await exportTo3MF(currentGeometries, filename, detailStartIndex, color);
         }
-    }, [currentGeometries, currentUser]);
+    }, [currentGeometries, currentUser, detailStartIndex, color]);
 
     const handleSaveProgress = async () => {
         if (!gameId || !currentUser) return;
@@ -149,6 +190,11 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                         color={color}
                         strokeWidth={strokeWidth}
                         detailStrokeWidth={detailStrokeWidth}
+                        backgroundImage={backgroundImage}
+                        isMoveMode={isMoveMode}
+                        onBackgroundMove={(dx, dy) => {
+                            setBackgroundImage(prev => prev ? { ...prev, x: prev.x + dx, y: prev.y + dy } : null);
+                        }}
                     />
                 </div>
 
@@ -162,7 +208,10 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                         detailStrokeWidth={detailStrokeWidth}
                         outerExpansion={outerExpansion}
                         innerGap={innerGap}
-                        onGeometriesReady={setCurrentGeometries}
+                        onGeometriesReady={(geometries, detailIdx) => {
+                            setCurrentGeometries(geometries);
+                            setDetailStartIndex(detailIdx);
+                        }}
                     />
                 </div>
 
@@ -175,6 +224,14 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                         onClear={handleClear}
                         onExport3MF={handleExport3MF}
                         canExport={currentGeometries.length > 0}
+                        backgroundImage={backgroundImage}
+                        isMoveMode={isMoveMode}
+                        onMoveModeToggle={setIsMoveMode}
+                        onBackgroundUpload={handleBackgroundUpload}
+                        onBackgroundRemove={handleBackgroundRemove}
+                        onBackgroundChange={(updates) => {
+                            setBackgroundImage(prev => prev ? { ...prev, ...updates } : null);
+                        }}
                     />
                 </div>
             </div>

@@ -60,12 +60,21 @@ const en = {
         undo: 'Undo (Ctrl+Z)',
         clearCanvas: 'Clear Canvas',
         export3MF: '↓ Export 3MF',
+        backgroundPhoto: 'Background Photo',
+        uploadPhoto: 'Upload Photo',
+        changePhoto: 'Change Photo',
+        photoOpacity: 'Photo Opacity',
+        photoScale: 'Photo Scale',
+        movePhoto: 'Move Photo',
+        movePhotoOn: 'Move Photo (ON)',
+        removePhoto: 'Remove Photo',
     },
     canvas: {
         outlineMode: 'Outline (Base Shape)',
         detailMode: 'Detail (Clipped to base)',
         emptyState: 'Draw a shape to see 3D preview',
         size: '10cm',
+        movePhotoMode: 'Moving Photo',
     },
 } as const;
 

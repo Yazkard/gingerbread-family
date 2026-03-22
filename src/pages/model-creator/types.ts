@@ -19,3 +19,11 @@ export interface ExportOptions {
     filename: string;
     scale?: number;
 }
+
+export interface BackgroundImage {
+    dataUrl: string;
+    x: number;
+    y: number;
+    scale: number;
+    opacity: number;
+}

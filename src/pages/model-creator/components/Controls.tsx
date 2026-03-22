@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from '../../../i18n';
+import type { BackgroundImage } from '../types';
 
 interface ControlsProps {
     detailStrokeWidth: number;
@@ -9,6 +10,12 @@ interface ControlsProps {
     onClear: () => void;
     onExport3MF: () => void;
     canExport: boolean;
+    backgroundImage: BackgroundImage | null;
+    isMoveMode: boolean;
+    onMoveModeToggle: (enabled: boolean) => void;
+    onBackgroundUpload: (file: File) => void;
+    onBackgroundRemove: () => void;
+    onBackgroundChange: (updates: Partial<BackgroundImage>) => void;
 }
 
 const SliderControl: React.FC<{
@@ -18,10 +25,12 @@ const SliderControl: React.FC<{
     min: number;
     max: number;
     step: number;
-}> = ({ label, value, onChange, min, max, step }) => (
+    unit?: string;
+    decimals?: number;
+}> = ({ label, value, onChange, min, max, step, unit = 'mm', decimals = 1 }) => (
     <div style={{ marginBottom: '15px' }}>
         <label style={{ display: 'block', marginBottom: '8px', color: '#C4A882', fontSize: '14px' }}>
-            {label}: {value.toFixed(1)}mm
+            {label}: {value.toFixed(decimals)}{unit}
         </label>
         <input
             type="range"
@@ -43,8 +52,15 @@ export const Controls: React.FC<ControlsProps> = ({
     onClear,
     onExport3MF,
     canExport,
+    backgroundImage,
+    isMoveMode,
+    onMoveModeToggle,
+    onBackgroundUpload,
+    onBackgroundRemove,
+    onBackgroundChange,
 }) => {
     const { t } = useTranslation();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
         <div style={{
@@ -60,6 +76,112 @@ export const Controls: React.FC<ControlsProps> = ({
             <h2 style={{ marginTop: 0, marginBottom: '10px', color: '#F0D06E', fontSize: '1.1em', letterSpacing: '0.02em' }}>
                 {t('controls.heading')}
             </h2>
+
+            {/* Background Photo Section */}
+            <h3 style={{ margin: '0 0 4px 0', color: '#F0D06E', fontSize: '0.95em', fontWeight: 500 }}>
+                {t('controls.backgroundPhoto')}
+            </h3>
+
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onBackgroundUpload(file);
+                    e.target.value = '';
+                }}
+            />
+
+            <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: 'transparent',
+                    color: '#C4A882',
+                    border: '1px solid rgba(196,168,130,0.3)',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,168,130,0.1)'; }}
+                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
+            >
+                {backgroundImage ? t('controls.changePhoto') : t('controls.uploadPhoto')}
+            </button>
+
+            {backgroundImage && (
+                <>
+                    <SliderControl
+                        label={t('controls.photoOpacity')}
+                        value={backgroundImage.opacity}
+                        onChange={(val) => onBackgroundChange({ opacity: val })}
+                        min={0.05} max={1.0} step={0.05}
+                        unit="" decimals={2}
+                    />
+
+                    <SliderControl
+                        label={t('controls.photoScale')}
+                        value={backgroundImage.scale}
+                        onChange={(val) => onBackgroundChange({ scale: val })}
+                        min={0.1} max={3.0} step={0.05}
+                        unit="x" decimals={2}
+                    />
+
+                    <button
+                        onClick={() => onMoveModeToggle(!isMoveMode)}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: isMoveMode ? 'rgba(30,80,180,0.4)' : 'transparent',
+                            color: isMoveMode ? '#8AB4F8' : '#C4A882',
+                            border: `1px solid ${isMoveMode ? 'rgba(138,180,248,0.5)' : 'rgba(196,168,130,0.3)'}`,
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            fontFamily: 'inherit',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => {
+                            if (!isMoveMode) (e.target as HTMLButtonElement).style.background = 'rgba(196,168,130,0.1)';
+                        }}
+                        onMouseLeave={e => {
+                            (e.target as HTMLButtonElement).style.background = isMoveMode ? 'rgba(30,80,180,0.4)' : 'transparent';
+                        }}
+                    >
+                        {isMoveMode ? t('controls.movePhotoOn') : t('controls.movePhoto')}
+                    </button>
+
+                    <button
+                        onClick={onBackgroundRemove}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'transparent',
+                            color: '#ff6b6b',
+                            border: '1px solid rgba(196,30,58,0.5)',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            fontFamily: 'inherit',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,30,58,0.15)'; }}
+                        onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
+                    >
+                        {t('controls.removePhoto')}
+                    </button>
+                </>
+            )}
+
+            <div style={{ height: '1px', background: '#4A2E1A', margin: '4px 0' }} />
 
             <SliderControl
                 label={t('controls.detailWidth')}

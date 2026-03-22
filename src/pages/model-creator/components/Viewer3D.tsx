@@ -45,7 +45,7 @@ interface Viewer3DProps {
     detailStrokeWidth: number;
     outerExpansion: number;
     innerGap: number;
-    onGeometriesReady?: (geometries: THREE.BufferGeometry[]) => void;
+    onGeometriesReady?: (geometries: THREE.BufferGeometry[], detailStartIndex: number) => void;
 }
 
 import { buildGeometries } from '../utils/geometryBuilder';
@@ -57,10 +57,10 @@ const SceneContent: React.FC<{
     strokeWidth: number;
     outerExpansion: number;
     innerGap: number;
-    onGeometriesReady?: (geometries: THREE.BufferGeometry[]) => void;
+    onGeometriesReady?: (geometries: THREE.BufferGeometry[], detailStartIndex: number) => void;
 }> = ({ strokes, color, depth, strokeWidth, outerExpansion, innerGap, onGeometriesReady }) => {
     // Generate geometries
-    const { meshes, geometries } = useMemo(() => {
+    const { meshes, geometries, detailStartIndex } = useMemo(() => {
         return buildGeometries(strokes, {
             color,
             extrusionDepth: depth,
@@ -78,8 +78,8 @@ const SceneContent: React.FC<{
 
     // Notify parent only when geometries actually change
     useEffect(() => {
-        onGeometriesReadyRef.current?.(geometries);
-    }, [geometries]);
+        onGeometriesReadyRef.current?.(geometries, detailStartIndex);
+    }, [geometries, detailStartIndex]);
 
     return (
         <group>{meshes}</group>

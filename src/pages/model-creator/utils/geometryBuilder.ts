@@ -11,9 +11,9 @@ export interface BuildGeometriesOptions {
     innerGap: number;
 }
 
-export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptions): { meshes: React.ReactElement[], geometries: THREE.BufferGeometry[] } {
+export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptions): { meshes: React.ReactElement[], geometries: THREE.BufferGeometry[], detailStartIndex: number } {
     if (strokes.length === 0 || strokes[0].points.length < 2) {
-        return { meshes: [], geometries: [] };
+        return { meshes: [], geometries: [], detailStartIndex: 0 };
     }
 
     const { color, extrusionDepth: depth, strokeWidth, outerExpansion, innerGap } = options;
@@ -102,6 +102,8 @@ export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptio
         );
     }
 
+    const detailStartIndex = generatedGeometries.length;
+
     // --- OTHER STROKES (Decorations) ---
     for (let i = 1; i < normalizedStrokes.length; i++) {
         const stroke = normalizedStrokes[i];
@@ -126,5 +128,5 @@ export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptio
         });
     }
 
-    return { meshes: generatedMeshes, geometries: generatedGeometries };
+    return { meshes: generatedMeshes, geometries: generatedGeometries, detailStartIndex };
 }

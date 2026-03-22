@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from '../../../i18n';
-import type { Point2D, Stroke } from '../types';
+import type { Point2D, Stroke, BackgroundImage } from '../types';
 import { isPointNear } from '../utils/extrusionUtils';
 
 interface DrawingCanvasProps {
@@ -9,6 +9,9 @@ interface DrawingCanvasProps {
     color: string;
     strokeWidth: number;
     detailStrokeWidth: number;
+    backgroundImage: BackgroundImage | null;
+    isMoveMode: boolean;
+    onBackgroundMove: (dx: number, dy: number) => void;
 }
 
 export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
@@ -16,13 +19,30 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     onStrokesChange,
     color,
     strokeWidth,
-    detailStrokeWidth
+    detailStrokeWidth,
+    backgroundImage,
+    isMoveMode,
+    onBackgroundMove,
 }) => {
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [currentStroke, setCurrentStroke] = useState<Point2D[]>([]);
+    const [dragStart, setDragStart] = useState<Point2D | null>(null);
+    const [rawLoadedBgImage, setRawLoadedBgImage] = useState<HTMLImageElement | null>(null);
     const CANVAS_SIZE = 500;
+
+    // Load background image when dataUrl changes
+    const bgDataUrl = backgroundImage?.dataUrl;
+    useEffect(() => {
+        if (!bgDataUrl) return;
+        const img = new Image();
+        img.onload = () => setRawLoadedBgImage(img);
+        img.src = bgDataUrl;
+    }, [bgDataUrl]);
+
+    // Derived: null when no background, stale image cleared automatically
+    const loadedBgImage = backgroundImage ? rawLoadedBgImage : null;
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -33,6 +53,22 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw background image
+        if (loadedBgImage && backgroundImage) {
+            ctx.save();
+            ctx.globalAlpha = backgroundImage.opacity;
+            const drawWidth = loadedBgImage.naturalWidth * backgroundImage.scale;
+            const drawHeight = loadedBgImage.naturalHeight * backgroundImage.scale;
+            ctx.drawImage(
+                loadedBgImage,
+                backgroundImage.x - drawWidth / 2,
+                backgroundImage.y - drawHeight / 2,
+                drawWidth,
+                drawHeight
+            );
+            ctx.restore();
+        }
 
         // Draw grid lines
         ctx.strokeStyle = '#4A2E1A';
@@ -107,7 +143,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         ctx.font = '10px Arial';
         ctx.fillText(t('canvas.size'), CANVAS_SIZE - 25, 12);
         ctx.fillText(t('canvas.size'), 2, CANVAS_SIZE - 5);
-    }, [strokes, isDrawing, currentStroke, color, detailStrokeWidth, t]);
+    }, [strokes, isDrawing, currentStroke, color, detailStrokeWidth, t, backgroundImage, loadedBgImage]);
 
     const getPoint = (clientX: number, clientY: number): Point2D => {
         const canvas = canvasRef.current!;
@@ -121,11 +157,21 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     };
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (isMoveMode && backgroundImage) {
+            setDragStart(getPoint(e.clientX, e.clientY));
+            return;
+        }
         setIsDrawing(true);
         setCurrentStroke([getPoint(e.clientX, e.clientY)]);
     };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (isMoveMode && dragStart) {
+            const pt = getPoint(e.clientX, e.clientY);
+            onBackgroundMove(pt.x - dragStart.x, pt.y - dragStart.y);
+            setDragStart(pt);
+            return;
+        }
         if (!isDrawing) return;
 
         const newPoint = getPoint(e.clientX, e.clientY);
@@ -143,13 +189,23 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
         const touch = e.touches[0];
+        if (isMoveMode && backgroundImage) {
+            setDragStart(getPoint(touch.clientX, touch.clientY));
+            return;
+        }
         setIsDrawing(true);
         setCurrentStroke([getPoint(touch.clientX, touch.clientY)]);
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-        if (!isDrawing) return;
         const touch = e.touches[0];
+        if (isMoveMode && dragStart) {
+            const pt = getPoint(touch.clientX, touch.clientY);
+            onBackgroundMove(pt.x - dragStart.x, pt.y - dragStart.y);
+            setDragStart(pt);
+            return;
+        }
+        if (!isDrawing) return;
         const newPoint = getPoint(touch.clientX, touch.clientY);
         const lastPoint = currentStroke[currentStroke.length - 1];
         const dist = Math.sqrt(
@@ -162,10 +218,18 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     };
 
     const handleTouchEnd = () => {
+        if (isMoveMode) {
+            setDragStart(null);
+            return;
+        }
         handleMouseUp();
     };
 
     const handleMouseUp = () => {
+        if (isMoveMode) {
+            setDragStart(null);
+            return;
+        }
         if (!isDrawing) return;
         setIsDrawing(false);
 
@@ -196,6 +260,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     };
 
     const handleMouseLeave = () => {
+        if (isMoveMode) {
+            setDragStart(null);
+            return;
+        }
         if (isDrawing) {
             handleMouseUp();
         }
@@ -217,7 +285,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 style={{
                     border: '2px solid #4A2E1A',
                     borderRadius: '4px',
-                    cursor: 'crosshair',
+                    cursor: isMoveMode ? 'move' : 'crosshair',
                     backgroundColor: '#150C07',
                     touchAction: 'none',
                     display: 'block',
@@ -229,19 +297,20 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 position: 'absolute',
                 bottom: '10px',
                 right: '10px',
-                background: 'rgba(0,0,0,0.7)',
+                background: isMoveMode ? 'rgba(30,80,180,0.7)' : 'rgba(0,0,0,0.7)',
                 color: '#fff',
                 padding: '4px 8px',
                 borderRadius: '4px',
                 fontSize: '11px',
                 pointerEvents: 'none',
-                border: '1px solid #4A2E1A'
+                border: isMoveMode ? '1px solid rgba(138,180,248,0.5)' : '1px solid #4A2E1A'
             }}>
-                {strokes.length === 0
-                    ? t('canvas.outlineMode')
-                    : t('canvas.detailMode')}
+                {isMoveMode
+                    ? t('canvas.movePhotoMode')
+                    : strokes.length === 0
+                        ? t('canvas.outlineMode')
+                        : t('canvas.detailMode')}
             </div>
         </div>
     );
 };
-

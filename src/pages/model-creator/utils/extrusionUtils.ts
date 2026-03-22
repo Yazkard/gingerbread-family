@@ -38,7 +38,7 @@ export function getOffsetPoints(points: Point2D[], distance: number): Point2D[] 
 
     const offsetPoints: Point2D[] = [];
     const isClosed = isPointNear(points[0], points[points.length - 1], 1.0);
-    const miterLimit = 5.0; // Prevent extreme spikes
+    const miterLimit = 2.0; // Prevent extreme spikes
 
     for (let i = 0; i < points.length; i++) {
         const current = points[i];
@@ -101,22 +101,32 @@ export function getOffsetPoints(points: Point2D[], distance: number): Point2D[] 
             });
         } else {
             // Miter calculation
-            // cos(theta) = n1 dot bisector / (len(n1) * len(bisector))
             const bisector = { x: nx / nLen, y: ny / nLen };
             const cosTheta = n1.x * bisector.x + n1.y * bisector.y;
+            const miterDist = distance / cosTheta;
 
-            // Miter distance = distance / cos(theta)
-            let miterDist = distance / cosTheta;
-
-            // Clamp miter to avoid infinite spikes
             if (Math.abs(miterDist) > Math.abs(distance) * miterLimit) {
-                miterDist = Math.sign(miterDist) * Math.abs(distance) * miterLimit;
-            }
+                // Round join: insert arc points instead of clamped miter
+                const angle0 = Math.atan2(n1.y, n1.x);
+                const angle1 = Math.atan2(n2.y, n2.x);
+                let delta = angle1 - angle0;
+                while (delta > Math.PI) delta -= Math.PI * 2;
+                while (delta < -Math.PI) delta += Math.PI * 2;
 
-            offsetPoints.push({
-                x: current.x + bisector.x * miterDist,
-                y: current.y + bisector.y * miterDist
-            });
+                const steps = Math.max(2, Math.round(Math.abs(delta) / Math.PI * 8));
+                for (let k = 0; k <= steps; k++) {
+                    const a = angle0 + (k / steps) * delta;
+                    offsetPoints.push({
+                        x: current.x + Math.cos(a) * distance,
+                        y: current.y + Math.sin(a) * distance
+                    });
+                }
+            } else {
+                offsetPoints.push({
+                    x: current.x + bisector.x * miterDist,
+                    y: current.y + bisector.y * miterDist
+                });
+            }
         }
     }
 
@@ -187,7 +197,8 @@ function buildStrokeOutline(
     const traceSide = (
         segStart: number, segEnd: number,  // inclusive range of segment indices
         side: number,                       // +1 = left side, -1 = right side
-        forward: boolean                    // true = segments go segStart..segEnd, false = reversed
+        forward: boolean,                   // true = segments go segStart..segEnd, false = reversed
+        closed: boolean = false             // true = add wrap-around join from last to first segment
     ): Point2D[] => {
         const r = side > 0 ? rL : rR;
         const result: Point2D[] = [];
@@ -209,9 +220,12 @@ function buildStrokeOutline(
             const p = forward ? points[s + 1] : points[s];
             result.push({ x: p.x + r * norm.x, y: p.y + r * norm.y });
 
-            // Handle join to next segment (if not the last)
-            if (si < segs.length - 1) {
-                const sNext = segs[si + 1];
+            // Handle join to next segment (including wrap-around for closed paths)
+            const hasJoin = si < segs.length - 1 || closed;
+            if (hasJoin) {
+                const sNext = (closed && si === segs.length - 1)
+                    ? segs[0]
+                    : segs[si + 1];
                 const normNext = norms[sNext];
 
                 // Cross product of the two segment directions tells us turn direction
@@ -257,8 +271,7 @@ function buildStrokeOutline(
     const outline: Point2D[] = [];
 
     if (isClosed) {
-        // Closed loop: use simple miter-offset points — clean, no artifacts.
-        // Round joins are only needed for open strokes where ends are visible.
+        // Closed loop: use getOffsetPoints (produces valid ring polygon)
         const leftPoints = getOffsetPoints(points, rL);
         const rightPoints = getOffsetPoints(points, rR);
         leftPoints.forEach(p => outline.push(p));
@@ -350,7 +363,9 @@ export function createInsetFillGeometry(
     // CCW loop: Left normal points INWARD. (+distance)
     // CW loop: Left normal points OUTWARD. (-distance)
     // isClockWise(CCW) = false. isClockWise(CW) = true.
-    const insetPoints = getOffsetPoints(points, isCW ? -inset : inset);
+    const insetPoints = resolvePathSelfIntersections(
+        getOffsetPoints(points, isCW ? -inset : inset)
+    );
 
     if (insetPoints.length < 3) return null;
 
