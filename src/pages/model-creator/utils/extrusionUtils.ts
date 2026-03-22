@@ -357,7 +357,7 @@ export function createInsetFillGeometry(
     if (points.length < 3) return null;
 
     // Determine winding order to know which way is "in"
-    const isCW = THREE.ShapeUtils.isClockWise(points as any);
+    const isCW = THREE.ShapeUtils.isClockWise(points as unknown as THREE.Vector2[]);
 
     // In Three.js coordinate system (Y up):
     // CCW loop: Left normal points INWARD. (+distance)

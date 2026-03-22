@@ -37,7 +37,7 @@ export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptio
     const basePoints = resolvePathSelfIntersections(normalizedStrokes[0].points);
 
     // Determine winding order for offset directions (Y up space)
-    // @ts-ignore
+    // @ts-expect-error ShapeUtils.isClockWise expects Vector2[] but Point2D works
     const isCW = THREE.ShapeUtils.isClockWise(basePoints);
 
     // 1. Outer Flange (Attached to outside)
