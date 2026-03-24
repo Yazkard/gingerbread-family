@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../../i18n';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -48,7 +48,7 @@ interface Viewer3DProps {
     onGeometriesReady?: (geometries: THREE.BufferGeometry[], detailStartIndex: number) => void;
 }
 
-import { buildGeometries } from '../utils/geometryBuilder';
+import { buildGeometries, buildCookieGeometries } from '../utils/geometryBuilder';
 
 const SceneContent: React.FC<{
     strokes: Stroke[];
@@ -57,18 +57,25 @@ const SceneContent: React.FC<{
     strokeWidth: number;
     outerExpansion: number;
     innerGap: number;
+    cookieView: boolean;
     onGeometriesReady?: (geometries: THREE.BufferGeometry[], detailStartIndex: number) => void;
-}> = ({ strokes, color, depth, strokeWidth, outerExpansion, innerGap, onGeometriesReady }) => {
-    // Generate geometries
-    const { meshes, geometries, detailStartIndex } = useMemo(() => {
+}> = ({ strokes, color, depth, strokeWidth, outerExpansion, innerGap, cookieView, onGeometriesReady }) => {
+    // Form geometries — always computed, used for export
+    const formResult = useMemo(() => {
         return buildGeometries(strokes, {
             color,
             extrusionDepth: depth,
             strokeWidth,
             outerExpansion,
-            innerGap
+            innerGap,
         });
     }, [strokes, depth, color, strokeWidth, outerExpansion, innerGap]);
+
+    // Cookie geometries — only computed when cookie view is active
+    const cookieResult = useMemo(() => {
+        if (!cookieView) return null;
+        return buildCookieGeometries(strokes, { strokeWidth });
+    }, [strokes, strokeWidth, cookieView]);
 
     // Keep callback in a ref so it never appears in the effect dependency array,
     // preventing the render loop: geometries change → setCurrentGeometries → App re-renders
@@ -76,10 +83,12 @@ const SceneContent: React.FC<{
     const onGeometriesReadyRef = useRef(onGeometriesReady);
     useEffect(() => { onGeometriesReadyRef.current = onGeometriesReady; });
 
-    // Notify parent only when geometries actually change
+    // Export always uses the form geometries regardless of view mode
     useEffect(() => {
-        onGeometriesReadyRef.current?.(geometries, detailStartIndex);
-    }, [geometries, detailStartIndex]);
+        onGeometriesReadyRef.current?.(formResult.geometries, formResult.detailStartIndex);
+    }, [formResult.geometries, formResult.detailStartIndex]);
+
+    const meshes = cookieView ? (cookieResult?.meshes ?? []) : formResult.meshes;
 
     return (
         <group>{meshes}</group>
@@ -88,6 +97,7 @@ const SceneContent: React.FC<{
 
 export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
     const { t } = useTranslation();
+    const [cookieView, setCookieView] = useState(false);
     return (
         <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', border: '2px solid #4A2E1A', borderRadius: '8px', overflow: 'hidden', touchAction: 'none' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -96,7 +106,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
                 camera={{ position: [50, -50, 150], fov: 50 }}
                 style={{ background: '#150C07', touchAction: 'none' }}
             >
-                <ambientLight intensity={0.5} />
+                <ambientLight intensity={cookieView ? 0.7 : 0.5} />
                 <directionalLight
                     position={[10, 10, 5]}
                     intensity={1}
@@ -105,8 +115,9 @@ export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
                     shadow-mapSize-height={1024}
                 />
                 <pointLight position={[-10, -10, -5]} intensity={0.5} />
+                {cookieView && <pointLight position={[0, 0, 30]} intensity={0.6} color="#fff8e7" />}
 
-                <SceneContent {...props} depth={props.extrusionDepth} />
+                <SceneContent {...props} depth={props.extrusionDepth} cookieView={cookieView} />
 
                 <SimpleGrid size={150} divisions={30} centerX={50} centerY={-50} />
 
@@ -118,6 +129,25 @@ export const Viewer3D: React.FC<Viewer3DProps> = (props) => {
                     maxDistance={500}
                 />
             </Canvas>
+
+            <button
+                onClick={() => setCookieView(v => !v)}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: cookieView ? 'rgba(212,160,23,0.25)' : 'rgba(30,17,9,0.85)',
+                    border: `1px solid ${cookieView ? '#D4A017' : 'rgba(212,160,23,0.3)'}`,
+                    color: cookieView ? '#F0D06E' : '#C4A882',
+                    borderRadius: '6px',
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    zIndex: 10,
+                }}
+            >
+                {cookieView ? t('viewer.cookieViewOn') : t('viewer.cookieViewOff')}
+            </button>
 
             {props.strokes.length === 0 && (
                 <div style={{

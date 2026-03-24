@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import React from 'react';
 import type { Stroke } from '../types';
-import { createRibbonGeometry, createInsetFillGeometry, clipPathToPolygon, getOffsetPoints, resolvePathSelfIntersections } from './extrusionUtils';
+import { createRibbonGeometry, createInsetFillGeometry, createExtrudedGeometry, clipPathToPolygon, getOffsetPoints, resolvePathSelfIntersections, smoothPathChaikin } from './extrusionUtils';
 
 export interface BuildGeometriesOptions {
     color: string;
@@ -128,4 +128,75 @@ export function buildGeometries(strokes: Stroke[], options: BuildGeometriesOptio
     }
 
     return { meshes: generatedMeshes, geometries: generatedGeometries, detailStartIndex };
+}
+
+const COOKIE_DEPTH = 8;
+const ICING_DEPTH = 1.5;
+
+export function buildCookieGeometries(strokes: Stroke[], options: Pick<BuildGeometriesOptions, 'strokeWidth'>): { meshes: React.ReactElement[] } {
+    if (strokes.length === 0 || strokes[0].points.length < 3) {
+        return { meshes: [] };
+    }
+
+    const { strokeWidth } = options;
+    const normalizedStrokes = strokes.map(s => ({
+        ...s,
+        points: s.points.map(p => ({ x: p.x * 0.2, y: -p.y * 0.2 }))
+    }));
+
+    const generatedMeshes: React.ReactElement[] = [];
+    const basePoints = resolvePathSelfIntersections(normalizedStrokes[0].points);
+
+    // Smooth the outline with Chaikin corner-cutting for a baked-cookie fillet look
+    const smoothedPoints = smoothPathChaikin(basePoints, 3);
+
+    // Cookie body: solid filled shape with rounded corners
+    const cookieGeo = createExtrudedGeometry(smoothedPoints, COOKIE_DEPTH);
+    if (cookieGeo) {
+        cookieGeo.computeVertexNormals();
+        generatedMeshes.push(
+            React.createElement('mesh', { key: "cookie-body", geometry: cookieGeo, castShadow: true, receiveShadow: true },
+                React.createElement('meshStandardMaterial', { color: '#c47a3b', roughness: 0.8, metalness: 0, side: THREE.DoubleSide })
+            )
+        );
+    }
+
+    // Groove details: decoration strokes cut into the cookie surface
+    for (let i = 1; i < normalizedStrokes.length; i++) {
+        const stroke = normalizedStrokes[i];
+        const sStrokeWidth = stroke.width ?? strokeWidth;
+
+        // Clip to the smoothed outline so grooves stay inside the rounded cookie
+        const clippedPaths = clipPathToPolygon(stroke.points, smoothedPoints);
+
+        clippedPaths.forEach((path, pathIndex) => {
+            const grooveGeo = createRibbonGeometry(path, sStrokeWidth, ICING_DEPTH, 0);
+            if (grooveGeo) {
+                grooveGeo.computeVertexNormals();
+                generatedMeshes.push(
+                    React.createElement('mesh', {
+                        key: `groove-${i}-${pathIndex}`,
+                        geometry: grooveGeo,
+                        // Sunk into cookie: groove top is flush with cookie top surface
+                        position: [0, 0, COOKIE_DEPTH - ICING_DEPTH],
+                        castShadow: true,
+                        receiveShadow: true,
+                    },
+                        React.createElement('meshStandardMaterial', {
+                            color: '#8b4010',
+                            roughness: 0.95,
+                            metalness: 0,
+                            // Prevent z-fighting where groove top face meets cookie top face
+                            polygonOffset: true,
+                            polygonOffsetFactor: -1,
+                            polygonOffsetUnits: -4,
+                            side: THREE.DoubleSide,
+                        })
+                    )
+                );
+            }
+        });
+    }
+
+    return { meshes: generatedMeshes };
 }

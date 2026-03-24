@@ -76,6 +76,10 @@ const en = {
         size: '10cm',
         movePhotoMode: 'Moving Photo',
     },
+    viewer: {
+        cookieViewOff: 'Cookie View',
+        cookieViewOn: 'Print View',
+    },
 } as const;
 
 export default en;

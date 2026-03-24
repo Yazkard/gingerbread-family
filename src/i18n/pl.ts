@@ -76,6 +76,10 @@ const pl = {
         size: '10cm',
         movePhotoMode: 'Przesuwanie zdjęcia',
     },
+    viewer: {
+        cookieViewOff: 'Widok ciastka',
+        cookieViewOn: 'Widok wydruku',
+    },
 } as const;
 
 export default pl;

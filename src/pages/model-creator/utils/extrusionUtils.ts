@@ -579,6 +579,37 @@ export function resolvePathSelfIntersections(points: Point2D[]): Point2D[] {
 }
 
 /**
+ * Smooths a closed polygon using Chaikin's corner-cutting algorithm.
+ * Each iteration replaces every edge with two new points at 1/4 and 3/4 along it,
+ * rounding sharp corners. 3 iterations produce visibly smooth, fillet-like curves.
+ */
+export function smoothPathChaikin(points: Point2D[], iterations: number): Point2D[] {
+    if (points.length < 3) return points;
+
+    // Work on non-duplicate closed ring: strip closing duplicate if present
+    let pts = [...points];
+    if (isPointNear(pts[0], pts[pts.length - 1], 1.0)) {
+        pts = pts.slice(0, pts.length - 1);
+    }
+
+    for (let iter = 0; iter < iterations; iter++) {
+        const result: Point2D[] = [];
+        const n = pts.length;
+        for (let i = 0; i < n; i++) {
+            const p = pts[i];
+            const q = pts[(i + 1) % n];
+            result.push({ x: 0.75 * p.x + 0.25 * q.x, y: 0.75 * p.y + 0.25 * q.y });
+            result.push({ x: 0.25 * p.x + 0.75 * q.x, y: 0.25 * p.y + 0.75 * q.y });
+        }
+        pts = result;
+    }
+
+    // Re-close
+    pts.push({ ...pts[0] });
+    return pts;
+}
+
+/**
  * Checks if a point is close to another point (for closing shapes)
  */
 export function isPointNear(p1: Point2D, p2: Point2D, threshold: number = 20): boolean {
