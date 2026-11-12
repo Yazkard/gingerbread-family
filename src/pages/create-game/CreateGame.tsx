@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { useTranslation } from '../../i18n';
 import { createGameInDb, type Game } from '../../lib/firebase';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { CloseIcon, PlusIcon, Rosette } from '../../components/Marks';
 import './CreateGame.css';
 
 // Simple fallback to generate unique IDs
@@ -79,18 +80,24 @@ export function CreateGame() {
     };
 
     return (
-        <div className="create-container">
-            <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+        <main className="create-page">
+            <div className="page-corner">
                 <LanguageSwitcher />
             </div>
-            <div className="create-card">
-                <h2>{t('createGame.heading')}</h2>
+            <div className="ticket">
+                <div className="ticket-band">
+                    <span>{t('landing.title')}</span>
+                    <Rosette size={16} />
+                    <div className="perforation perforation-bottom" aria-hidden="true" />
+                </div>
+                <h1 className="ticket-heading">{t('createGame.heading')}</h1>
 
-                <form onSubmit={handleGenerateLink} className="create-form">
-                    <div className="form-group">
+                <form onSubmit={handleGenerateLink}>
+                    <div className="ticket-row">
                         <label htmlFor="gameName">{t('createGame.gameNameLabel')}</label>
                         <input
                             id="gameName"
+                            className="field"
                             type="text"
                             value={gameName}
                             onChange={(e) => setGameName(e.target.value)}
@@ -100,63 +107,72 @@ export function CreateGame() {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>{t('createGame.membersLabel')}</label>
-                        {members.map((member, index) => (
-                            <div key={index} className="member-input-group">
-                                <input
-                                    type="text"
-                                    value={member}
-                                    onChange={(e) => handleMemberChange(index, e.target.value)}
-                                    placeholder={t('createGame.memberPlaceholder', { index: index + 1 })}
-                                    required={index === 0}
-                                    disabled={isSaving}
-                                />
-                                {members.length > 1 && (
-                                    <button
-                                        type="button"
-                                        className="remove-btn"
-                                        onClick={() => removeMemberField(index)}
+                    <fieldset className="ticket-row">
+                        <legend>{t('createGame.membersLabel')}</legend>
+                        <ol className="member-lines">
+                            {members.map((member, index) => (
+                                <li key={index} className="member-line">
+                                    <span className="member-num" aria-hidden="true">{index + 1}</span>
+                                    <input
+                                        className="field"
+                                        type="text"
+                                        value={member}
+                                        onChange={(e) => handleMemberChange(index, e.target.value)}
+                                        placeholder={t('createGame.memberPlaceholder', { index: index + 1 })}
+                                        aria-label={t('createGame.memberPlaceholder', { index: index + 1 })}
+                                        required={index === 0}
                                         disabled={isSaving}
-                                    >
-                                        ✕
-                                    </button>
-                                )}
-                            </div>
-                        ))}
+                                    />
+                                    {members.length > 1 && (
+                                        <button
+                                            type="button"
+                                            className="remove-btn"
+                                            onClick={() => removeMemberField(index)}
+                                            disabled={isSaving}
+                                            aria-label={t('createGame.removeMember', { index: index + 1 })}
+                                        >
+                                            <CloseIcon />
+                                        </button>
+                                    )}
+                                </li>
+                            ))}
+                        </ol>
                         <button
                             type="button"
-                            className="add-member-btn"
+                            className="btn btn-quiet btn-block add-member-btn"
                             onClick={addMemberField}
                             disabled={isSaving}
                         >
+                            <PlusIcon />
                             {t('createGame.addMember')}
                         </button>
-                    </div>
+                    </fieldset>
 
-                    <button type="submit" className="generate-btn" disabled={isSaving}>
+                    <button type="submit" className="btn btn-primary btn-block ticket-submit" disabled={isSaving}>
                         {isSaving ? t('createGame.generating') : t('createGame.generate')}
                     </button>
                 </form>
 
                 {generatedLink && (
-                    <div className="link-result">
-                        <p>{t('createGame.shareLabel')}</p>
+                    <div className="ticket-stub">
+                        <div className="perforation" aria-hidden="true" />
+                        <p id="share-label">{t('createGame.shareLabel')}</p>
                         <div className="link-box">
-                            <input type="text" readOnly value={generatedLink} />
+                            <input className="field" type="text" readOnly value={generatedLink} aria-labelledby="share-label" />
                             <button
+                                type="button"
+                                className="btn"
                                 onClick={() => navigator.clipboard.writeText(generatedLink)}
-                                title={t('createGame.copy')}
                             >
                                 {t('createGame.copy')}
                             </button>
                         </div>
-                        <button className="join-game-btn" onClick={handleGoToGame}>
+                        <button type="button" className="btn btn-block" onClick={handleGoToGame}>
                             {t('createGame.joinNow')}
                         </button>
                     </div>
                 )}
             </div>
-        </div>
+        </main>
     );
 }

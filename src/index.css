@@ -1,86 +1,298 @@
+@font-face {
+  font-family: 'Kreon';
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/kreon-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Kreon';
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/kreon-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Vollkorn';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./assets/fonts/vollkorn-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Vollkorn';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./assets/fonts/vollkorn-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
-  /* Artisan Bakery Palette */
-  --red: #C41E3A;
-  --red-dark: #8B1A2B;
-  --green: #8B4513;
-  --green-light: #A0522D;
-  --gold: #D4A017;
-  --gold-light: #F0D06E;
-  --cream: #FFF8E7;
-  --snow: #FAFAFA;
+  /* Carved walnut press */
+  --wood-950: #1a1108;
+  --wood-900: #24180c;
+  --wood-800: #312112;
+  --wood-hover: #3b2817;
+  --wood-700: #4a3320;
+  --wood-600: #6b4a2e;
 
-  /* Semantic mappings */
-  --bg-primary: #150C07;
-  --bg-secondary: #1E1109;
-  --bg-card: #2A1810;
-  --text-primary: var(--cream);
-  --text-secondary: #C4A882;
-  --accent: var(--gold);
-  --border: #4A2E1A;
+  /* Dough & icing */
+  --dough-100: #f4e6cc;
+  --dough-300: #d8bf98;
+  --dough-500: #a88a62;
+  --icing: #ffffff;
+  --gingerbread: #d2691e;
 
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Juniper folk red: one primary action per screen, and sealed states */
+  --juniper-500: #c0392b;
+  --juniper-600: #9e2a20;
+  --juniper-700: #7d1f17;
+  --danger-text: #f0a093;
+
+  --bg: var(--wood-950);
+  --surface: var(--wood-900);
+  --surface-raised: var(--wood-800);
+  --line: var(--wood-700);
+  --line-strong: var(--wood-600);
+  --text: var(--dough-100);
+  --text-2: var(--dough-300);
+  --text-3: var(--dough-500);
+
+  /* Relief: raised (stamped out) and carved (pressed in) */
+  --relief-raised:
+    inset 0 1px 0 rgba(255, 236, 205, 0.09),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 2px 5px rgba(0, 0, 0, 0.4);
+  --relief-carved:
+    inset 0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 236, 205, 0.06);
+
+  --font-display: 'Kreon', 'Rockwell', serif;
+  --font-body: 'Vollkorn', Georgia, serif;
+
+  --radius: 6px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  font-family: var(--font-body);
+  font-size: 17px;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: dark;
-  color: var(--text-primary);
-  background-color: var(--bg-primary);
-
+  color: var(--text);
+  background-color: var(--bg);
   font-synthesis: none;
+  font-variant-numeric: lining-nums;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-color: var(--line-strong) var(--bg);
 }
 
-a {
-  font-weight: 500;
-  color: var(--gold);
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: var(--gold-light);
+::selection {
+  background: var(--juniper-600);
+  color: var(--dough-100);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: var(--bg);
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
-  margin: 0 auto;
 }
 
 h1, h2, h3 {
-  font-family: 'Playfair Display', Georgia, serif;
-}
-
-h1 {
-  font-size: 3.2em;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 1.1;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--dough-100);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-color: var(--dough-300);
+}
+
+:focus-visible {
+  outline: 2px solid var(--dough-100);
+  outline-offset: 2px;
+}
+
+input, button, select {
+  font: inherit;
+  color: inherit;
+}
+
+input::placeholder {
+  color: var(--text-3);
+  opacity: 1;
+}
+
+input[type="range"] {
+  accent-color: var(--juniper-500);
+}
+
+/* Buttons: stamped wood blocks. .btn-primary is the one juniper action per screen. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 44px;
+  padding: 0.55em 1.2em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
-  transition: border-color 0.25s, background-color 0.25s;
+  box-shadow: var(--relief-raised);
+  transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s var(--ease-out);
+  text-decoration: none;
 }
 
-button:hover {
-  border-color: var(--gold);
+.btn:hover:not(:disabled) {
+  background: var(--wood-hover);
 }
 
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.btn:active:not(:disabled) {
+  box-shadow: var(--relief-carved);
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--juniper-600);
+  border-color: var(--juniper-700);
+  color: var(--dough-100);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--juniper-700);
+}
+
+.btn-quiet {
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--line);
+  color: var(--text-2);
+}
+
+.btn-quiet:hover:not(:disabled) {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--juniper-700);
+  color: var(--danger-text);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(158, 42, 32, 0.18);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Carved field: inputs read as cut into the board */
+.field {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0.55em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--wood-950);
+  color: var(--text);
+  font-size: 1rem;
+  box-shadow: var(--relief-carved);
+}
+
+.field:focus-visible {
+  outline: 2px solid var(--dough-100);
+  outline-offset: 1px;
+  border-color: var(--line-strong);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--relief-raised);
+}
+
+.page-corner {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+}
+
+.rosette-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--line-strong);
+}
+
+.rosette-rule::before,
+.rosette-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 5px;
+  border: 2px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--line-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: background-color 0.15s;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
 }

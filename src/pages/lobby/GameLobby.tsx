@@ -6,6 +6,7 @@ import { db, type Game } from '../../lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { exportAllToZip } from '../model-creator/utils/export3MF';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { DownloadIcon, Rosette } from '../../components/Marks';
 import './GameLobby.css';
 
 export function GameLobby({ params }: { params: { gameId: string } }) {
@@ -59,87 +60,96 @@ export function GameLobby({ params }: { params: { gameId: string } }) {
 
     if (isLoading) {
         return (
-            <div className="lobby-container">
-                <div className="lobby-card">
-                    <h2>{t('lobby.loading')}</h2>
+            <main className="lobby-page">
+                <div className="lobby-board" aria-busy="true">
+                    <p className="lobby-loading">{t('lobby.loading')}</p>
                 </div>
-            </div>
+            </main>
         );
     }
 
     if (error || !game) {
         return (
-            <div className="lobby-container">
-                <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+            <main className="lobby-page">
+                <div className="page-corner">
                     <LanguageSwitcher />
                 </div>
-                <div className="lobby-card">
-                    <h2>{t('lobby.error')}</h2>
-                    <p className="error-text">{error || t('lobby.gameNotFound')}</p>
-                    <button className="member-btn" onClick={() => setLocation('/')}>
+                <div className="lobby-board">
+                    <h1>{t('lobby.error')}</h1>
+                    <p className="lobby-error" role="alert">{error || t('lobby.gameNotFound')}</p>
+                    <button type="button" className="btn btn-block" onClick={() => setLocation('/')}>
                         {t('lobby.goHome')}
                     </button>
                 </div>
-            </div>
+            </main>
         );
     }
 
     if (!currentUser) {
         return (
-            <div className="lobby-container">
-                <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+            <main className="lobby-page">
+                <div className="page-corner">
                     <LanguageSwitcher />
                 </div>
-                <div className="lobby-card">
-                    <h2>{t('lobby.welcome', { name: game.name })}</h2>
-                    <p>{t('lobby.selectWho')}</p>
+                <div className="lobby-board">
+                    <h1>{t('lobby.welcome', { name: game.name })}</h1>
+                    <p className="lobby-lede">{t('lobby.selectWho')}</p>
 
-                    <div className="members-list">
-                        {game.members && game.members.length > 0 ? (
-                            game.members.map((member, idx) => {
+                    {game.members && game.members.length > 0 ? (
+                        <ul className="stub-list">
+                            {game.members.map((member, idx) => {
                                 const project = game.projects?.[member];
                                 let statusText = t('lobby.notStarted');
-                                let statusClass = 'status-not-started';
+                                let statusClass = 'seal-blank';
 
                                 if (project) {
                                     if (project.status === 'completed') {
                                         statusText = t('lobby.completed');
-                                        statusClass = 'status-completed';
+                                        statusClass = 'seal-sealed';
                                     } else {
                                         statusText = t('lobby.inProgress');
-                                        statusClass = 'status-in-progress';
+                                        statusClass = 'seal-inked';
                                     }
                                 }
 
                                 return (
-                                    <button
-                                        key={idx}
-                                        className="member-btn"
-                                        onClick={() => setCurrentUser(member)}
-                                    >
-                                        <span className="member-avatar">{member.charAt(0)}</span>
-                                        <span className="member-name">{member}</span>
-                                        <span className={`status-dot ${statusClass}`} title={statusText} />
-                                        <span className="status-label">{statusText}</span>
-                                    </button>
+                                    <li key={idx}>
+                                        <button
+                                            type="button"
+                                            className="stub"
+                                            onClick={() => setCurrentUser(member)}
+                                        >
+                                            <span className="stub-end" aria-hidden="true">
+                                                <span className={`seal ${statusClass}`} />
+                                            </span>
+                                            <span className="stub-body">
+                                                <span className="stub-name">{member}</span>
+                                                <span className="stub-status">{statusText}</span>
+                                            </span>
+                                        </button>
+                                    </li>
                                 );
-                            })
-                        ) : (
-                            <p className="error-text">{t('lobby.noMembers')}</p>
-                        )}
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="lobby-error">{t('lobby.noMembers')}</p>
+                    )}
+
+                    <div className="rosette-rule lobby-rule" aria-hidden="true">
+                        <Rosette />
                     </div>
 
-                    <div className="bulk-export-section">
-                        <button
-                            className="bulk-export-btn"
-                            onClick={handleBulkExport}
-                            disabled={isExporting || !game.projects || Object.keys(game.projects).length === 0}
-                        >
-                            {isExporting ? t('lobby.exporting') : t('lobby.bulkExport')}
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-quiet btn-block"
+                        onClick={handleBulkExport}
+                        disabled={isExporting || !game.projects || Object.keys(game.projects).length === 0}
+                    >
+                        <DownloadIcon />
+                        {isExporting ? t('lobby.exporting') : t('lobby.bulkExport')}
+                    </button>
                 </div>
-            </div>
+            </main>
         );
     }
 

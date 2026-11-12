@@ -8,6 +8,7 @@ import type { Stroke, BackgroundImage } from './types';
 import { exportTo3MF } from './utils/export3MF';
 import { saveProjectToDb, type GameProject } from '../../lib/firebase';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { BackIcon } from '../../components/Marks';
 import * as THREE from 'three';
 import './ModelCreator.css';
 
@@ -143,35 +144,36 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
     };
 
     return (
-        <div className="app">
-            <header className="app-header">
+        <div className="workbench">
+            <header className="workbench-header">
                 <div className="header-content">
-                    <div>
+                    <div className="header-title">
                         <h1>{gameName || t('landing.title')}</h1>
                         <p>
                             {currentUser ? t('modelCreator.welcome', { name: currentUser }) : ''}
                             {t('modelCreator.instructions')}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div className="header-actions">
                         <LanguageSwitcher />
                         {!gameId && (
-                            <Link href="/">{t('modelCreator.backHome')}</Link>
+                            <Link href="/" className="btn btn-quiet"><BackIcon />{t('modelCreator.backHome')}</Link>
                         )}
                         {gameId && currentUser && (
                             <>
                                 <button
-                                    className="save-btn"
+                                    type="button"
+                                    className="btn"
                                     onClick={handleSaveProgress}
                                     disabled={isSaving}
                                 >
                                     {isSaving ? t('modelCreator.saving') : t('modelCreator.save')}
                                 </button>
                                 <button
-                                    className="save-btn"
+                                    type="button"
+                                    className="btn btn-primary"
                                     onClick={handleFinishSubmit}
                                     disabled={isSaving || strokes.length === 0}
-                                    style={{ background: '#4CAF50' }}
                                 >
                                     {isSaving ? t('modelCreator.submitting') : t('modelCreator.finish')}
                                 </button>
@@ -181,7 +183,7 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                 </div>
             </header>
 
-            <div className="app-content">
+            <main className="app-content">
                 <div className="canvas-section">
                     <h2>{t('modelCreator.drawing2D')}</h2>
                     <DrawingCanvas
@@ -224,6 +226,7 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                         onClear={handleClear}
                         onExport3MF={handleExport3MF}
                         canExport={currentGeometries.length > 0}
+                        exportIsPrimary={!gameId}
                         backgroundImage={backgroundImage}
                         isMoveMode={isMoveMode}
                         onMoveModeToggle={setIsMoveMode}
@@ -234,7 +237,7 @@ export function ModelCreator({ currentUser, gameName, gameId, initialProject }: 
                         }}
                     />
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

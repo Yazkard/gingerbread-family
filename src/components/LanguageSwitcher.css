@@ -1,0 +1,34 @@
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--wood-950);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--relief-carved);
+}
+
+.lang-switch button {
+  min-width: 44px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.lang-switch button:hover {
+  color: var(--text);
+}
+
+.lang-switch button[aria-pressed="true"] {
+  background: var(--surface-raised);
+  color: var(--dough-100);
+  box-shadow: var(--relief-raised);
+}

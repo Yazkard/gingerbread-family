@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from '../../../i18n';
 import type { Point2D, Stroke, BackgroundImage } from '../types';
 import { isPointNear } from '../utils/extrusionUtils';
+import './Board.css';
 
 interface DrawingCanvasProps {
     strokes: Stroke[];
@@ -51,6 +52,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        const css = getComputedStyle(canvas);
+        const token = (name: string) => css.getPropertyValue(name).trim();
+
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -71,7 +75,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         }
 
         // Draw grid lines
-        ctx.strokeStyle = '#4A2E1A';
+        ctx.strokeStyle = token('--wood-800');
         ctx.lineWidth = 1;
         for (let i = 0; i <= CANVAS_SIZE; i += 50) {
             ctx.beginPath();
@@ -85,7 +89,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         }
 
         // Draw visual boundary
-        ctx.strokeStyle = '#D4A017';
+        ctx.strokeStyle = token('--wood-600');
         ctx.setLineDash([5, 5]);
         ctx.strokeRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         ctx.setLineDash([]);
@@ -113,7 +117,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 ctx.strokeStyle = color;
             } else {
                 ctx.lineWidth = width * 5; // 1mm = 5px at 10cm/500px scale
-                ctx.strokeStyle = '#ffffff';
+                ctx.strokeStyle = token('--icing');
             }
 
             ctx.lineCap = 'round';
@@ -123,7 +127,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             if (isOuter && isCurrent) {
                 ctx.beginPath();
                 ctx.arc(points[0].x, points[0].y, 5, 0, Math.PI * 2);
-                ctx.fillStyle = '#D4A017';
+                ctx.fillStyle = token('--juniper-500');
                 ctx.fill();
             }
         };
@@ -139,10 +143,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         }
 
         // Add labels
-        ctx.fillStyle = '#C4A882';
-        ctx.font = '10px Arial';
-        ctx.fillText(t('canvas.size'), CANVAS_SIZE - 25, 12);
-        ctx.fillText(t('canvas.size'), 2, CANVAS_SIZE - 5);
+        ctx.fillStyle = token('--dough-500');
+        ctx.font = `13px ${token('--font-body')}`;
+        ctx.textAlign = 'right';
+        ctx.fillText(t('canvas.size'), CANVAS_SIZE - 6, 16);
+        ctx.textAlign = 'left';
+        ctx.fillText(t('canvas.size'), 6, CANVAS_SIZE - 8);
     }, [strokes, isDrawing, currentStroke, color, detailStrokeWidth, t, backgroundImage, loadedBgImage]);
 
     const getPoint = (clientX: number, clientY: number): Point2D => {
@@ -259,6 +265,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         setCurrentStroke([]);
     };
 
+    const handleTouchCancel = () => {
+        setDragStart(null);
+        setIsDrawing(false);
+        setCurrentStroke([]);
+    };
+
     const handleMouseLeave = () => {
         if (isMoveMode) {
             setDragStart(null);
@@ -270,7 +282,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     };
 
     return (
-        <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1' }}>
+        <div className="board">
             <canvas
                 ref={canvasRef}
                 width={CANVAS_SIZE}
@@ -282,29 +294,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                style={{
-                    border: '2px solid #4A2E1A',
-                    borderRadius: '4px',
-                    cursor: isMoveMode ? 'move' : 'crosshair',
-                    backgroundColor: '#150C07',
-                    touchAction: 'none',
-                    display: 'block',
-                    width: '100%',
-                    height: '100%',
-                }}
+                onTouchCancel={handleTouchCancel}
+                className={isMoveMode ? 'is-moving' : undefined}
             />
-            <div style={{
-                position: 'absolute',
-                bottom: '10px',
-                right: '10px',
-                background: isMoveMode ? 'rgba(30,80,180,0.7)' : 'rgba(0,0,0,0.7)',
-                color: '#fff',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '11px',
-                pointerEvents: 'none',
-                border: isMoveMode ? '1px solid rgba(138,180,248,0.5)' : '1px solid #4A2E1A'
-            }}>
+            <div className={`board-badge ${isMoveMode ? 'is-moving' : ''}`} aria-live="polite">
                 {isMoveMode
                     ? t('canvas.movePhotoMode')
                     : strokes.length === 0

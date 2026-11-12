@@ -1,6 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useId, useRef } from 'react';
 import { useTranslation } from '../../../i18n';
 import type { BackgroundImage } from '../types';
+import { DownloadIcon, Rosette } from '../../../components/Marks';
+import './Controls.css';
 
 interface ControlsProps {
     detailStrokeWidth: number;
@@ -10,6 +12,7 @@ interface ControlsProps {
     onClear: () => void;
     onExport3MF: () => void;
     canExport: boolean;
+    exportIsPrimary: boolean;
     backgroundImage: BackgroundImage | null;
     isMoveMode: boolean;
     onMoveModeToggle: (enabled: boolean) => void;
@@ -27,20 +30,30 @@ const SliderControl: React.FC<{
     step: number;
     unit?: string;
     decimals?: number;
-}> = ({ label, value, onChange, min, max, step, unit = 'mm', decimals = 1 }) => (
-    <div style={{ marginBottom: '15px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', color: '#C4A882', fontSize: '14px' }}>
-            {label}: {value.toFixed(decimals)}{unit}
-        </label>
-        <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={value}
-            onChange={(e) => onChange(parseFloat(e.target.value))}
-            style={{ width: '100%', cursor: 'pointer' }}
-        />
+}> = ({ label, value, onChange, min, max, step, unit = 'mm', decimals = 1 }) => {
+    const id = useId();
+    return (
+        <div className="slider">
+            <label htmlFor={id}>
+                <span>{label}</span>
+                <output htmlFor={id}>{value.toFixed(decimals)}{unit}</output>
+            </label>
+            <input
+                id={id}
+                type="range"
+                min={min}
+                max={max}
+                step={step}
+                value={value}
+                onChange={(e) => onChange(parseFloat(e.target.value))}
+            />
+        </div>
+    );
+};
+
+const Divider = () => (
+    <div className="rosette-rule controls-rule" aria-hidden="true">
+        <Rosette size={12} />
     </div>
 );
 
@@ -52,6 +65,7 @@ export const Controls: React.FC<ControlsProps> = ({
     onClear,
     onExport3MF,
     canExport,
+    exportIsPrimary,
     backgroundImage,
     isMoveMode,
     onMoveModeToggle,
@@ -63,30 +77,16 @@ export const Controls: React.FC<ControlsProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
-        <div style={{
-            padding: '20px',
-            background: 'rgba(30, 17, 9, 0.9)',
-            borderRadius: '12px',
-            border: '1px solid rgba(212,160,23,0.2)',
-            color: '#FFF8E7',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '15px',
-        }}>
-            <h2 style={{ marginTop: 0, marginBottom: '10px', color: '#F0D06E', fontSize: '1.1em', letterSpacing: '0.02em' }}>
-                {t('controls.heading')}
-            </h2>
+        <section className="controls panel" aria-labelledby="controls-heading">
+            <h2 id="controls-heading">{t('controls.heading')}</h2>
 
-            {/* Background Photo Section */}
-            <h3 style={{ margin: '0 0 4px 0', color: '#F0D06E', fontSize: '0.95em', fontWeight: 500 }}>
-                {t('controls.backgroundPhoto')}
-            </h3>
+            <h3>{t('controls.backgroundPhoto')}</h3>
 
             <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                style={{ display: 'none' }}
+                hidden
                 onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) onBackgroundUpload(file);
@@ -94,24 +94,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 }}
             />
 
-            <button
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: 'transparent',
-                    color: '#C4A882',
-                    border: '1px solid rgba(196,168,130,0.3)',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,168,130,0.1)'; }}
-                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
-            >
+            <button type="button" className="btn btn-quiet btn-block" onClick={() => fileInputRef.current?.click()}>
                 {backgroundImage ? t('controls.changePhoto') : t('controls.uploadPhoto')}
             </button>
 
@@ -134,54 +117,21 @@ export const Controls: React.FC<ControlsProps> = ({
                     />
 
                     <button
+                        type="button"
+                        className="btn btn-quiet btn-block move-toggle"
+                        aria-pressed={isMoveMode}
                         onClick={() => onMoveModeToggle(!isMoveMode)}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            background: isMoveMode ? 'rgba(30,80,180,0.4)' : 'transparent',
-                            color: isMoveMode ? '#8AB4F8' : '#C4A882',
-                            border: `1px solid ${isMoveMode ? 'rgba(138,180,248,0.5)' : 'rgba(196,168,130,0.3)'}`,
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            fontFamily: 'inherit',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={e => {
-                            if (!isMoveMode) (e.target as HTMLButtonElement).style.background = 'rgba(196,168,130,0.1)';
-                        }}
-                        onMouseLeave={e => {
-                            (e.target as HTMLButtonElement).style.background = isMoveMode ? 'rgba(30,80,180,0.4)' : 'transparent';
-                        }}
                     >
                         {isMoveMode ? t('controls.movePhotoOn') : t('controls.movePhoto')}
                     </button>
 
-                    <button
-                        onClick={onBackgroundRemove}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            background: 'transparent',
-                            color: '#ff6b6b',
-                            border: '1px solid rgba(196,30,58,0.5)',
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            fontFamily: 'inherit',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,30,58,0.15)'; }}
-                        onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
-                    >
+                    <button type="button" className="btn btn-danger btn-block" onClick={onBackgroundRemove}>
                         {t('controls.removePhoto')}
                     </button>
                 </>
             )}
 
-            <div style={{ height: '1px', background: '#4A2E1A', margin: '4px 0' }} />
+            <Divider />
 
             <SliderControl
                 label={t('controls.detailWidth')}
@@ -190,75 +140,26 @@ export const Controls: React.FC<ControlsProps> = ({
                 min={1} max={4} step={0.1}
             />
 
-            <div style={{ height: '1px', background: '#4A2E1A', margin: '4px 0' }} />
+            <Divider />
+
+            <div className="controls-pair">
+                <button type="button" className="btn btn-quiet" onClick={onUndo} disabled={!canUndo} title="Ctrl+Z" aria-keyshortcuts="Control+Z Meta+Z">
+                    {t('controls.undo')}
+                </button>
+                <button type="button" className="btn btn-danger" onClick={onClear}>
+                    {t('controls.clearCanvas')}
+                </button>
+            </div>
 
             <button
-                onClick={onUndo}
-                disabled={!canUndo}
-                style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: 'transparent',
-                    color: canUndo ? '#C4A882' : '#6B5040',
-                    border: '1px solid rgba(196,168,130,0.3)',
-                    borderRadius: '10px',
-                    cursor: canUndo ? 'pointer' : 'not-allowed',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                    opacity: canUndo ? 1 : 0.5,
-                }}
-                onMouseEnter={e => { if (canUndo) (e.target as HTMLButtonElement).style.background = 'rgba(196,168,130,0.1)'; }}
-                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
-            >
-                {t('controls.undo')}
-            </button>
-
-            <button
-                onClick={onClear}
-                style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: 'transparent',
-                    color: '#ff6b6b',
-                    border: '1px solid rgba(196,30,58,0.5)',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = 'rgba(196,30,58,0.15)'; }}
-                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = 'transparent'; }}
-            >
-                {t('controls.clearCanvas')}
-            </button>
-
-            <button
+                type="button"
+                className={`btn btn-block controls-export ${exportIsPrimary ? 'btn-primary' : ''}`}
                 onClick={onExport3MF}
                 disabled={!canExport}
-                style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: canExport
-                        ? 'linear-gradient(135deg, #8B4513 0%, #D4A017 100%)'
-                        : 'rgba(74,46,26,0.4)',
-                    color: '#FFF8E7',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: canExport ? 'pointer' : 'not-allowed',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    fontFamily: 'inherit',
-                    opacity: canExport ? 1 : 0.5,
-                    boxShadow: canExport ? '0 4px 16px rgba(212,160,23,0.3)' : 'none',
-                    transition: 'opacity 0.2s, transform 0.15s',
-                }}
             >
+                <DownloadIcon />
                 {t('controls.export3MF')}
             </button>
-        </div>
+        </section>
     );
 };

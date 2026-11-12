@@ -1,0 +1,115 @@
+.controls {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.controls h2 {
+  font-size: 1.25rem;
+  margin: 0 0 4px;
+  color: var(--dough-100);
+}
+
+.controls h3 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-2);
+}
+
+.slider label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 0.9375rem;
+  color: var(--text-2);
+}
+
+.slider output {
+  color: var(--text);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Range: a carved channel with a juniper stamp for the thumb */
+.slider input {
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider input::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--wood-950);
+  box-shadow: var(--relief-carved);
+}
+
+.slider input::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--wood-950);
+  box-shadow: var(--relief-carved);
+}
+
+.slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 2px solid var(--dough-100);
+  background: var(--juniper-600);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.slider input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--dough-100);
+  background: var(--juniper-600);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.slider input:focus-visible {
+  outline: none;
+}
+
+.slider input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--dough-100);
+  outline-offset: 2px;
+}
+
+.slider input:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--dough-100);
+  outline-offset: 2px;
+}
+
+.move-toggle[aria-pressed="true"] {
+  background: var(--wood-950);
+  color: var(--dough-100);
+  border-color: var(--dough-500);
+  box-shadow: var(--relief-carved);
+}
+
+.controls-rule {
+  margin: 4px 0;
+}
+
+.controls-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.controls-export {
+  min-height: 50px;
+  font-size: 1.0625rem;
+}
