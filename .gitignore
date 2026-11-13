@@ -29,3 +29,6 @@ dist-ssr
 .impeccable/
 .github/*
 !.github/workflows/
+
+# Hairline look sheets and test pages (the figures live in public/hairline/)
+hairline/

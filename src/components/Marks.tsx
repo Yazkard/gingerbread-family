@@ -1,7 +1,3 @@
-// Gingerbread-person outline in a 200x220 box, shared by the landing press demo.
-export const GINGERBREAD_PATH =
-    'M88 74 C70 76 56 78 48 84 C38 92 42 110 56 110 L80 104 L76 144 L60 186 C54 200 70 210 80 200 L100 162 L120 200 C130 210 146 200 140 186 L124 144 L120 104 L144 110 C158 110 162 92 152 84 C144 78 130 76 112 74 A28 28 0 1 0 88 74 Z';
-
 export function Rosette({ size = 14 }: { size?: number }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
