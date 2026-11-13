@@ -1,0 +1,25 @@
+/* The kernel's palette, taken from the walnut tokens: ground plate, one bright stroke. */
+.hl-figure {
+  position: relative;
+  width: 100%;
+  --hairline-plate: var(--bg);
+  --hairline-hi: var(--dough-100);
+  --hairline-edge: var(--dough-500);
+  --hairline-mid: var(--wood-600);
+  --hairline-lo: var(--wood-700);
+  --hairline-stroke: 1.1;
+}
+
+.hl-stage {
+  width: 100%;
+}
+
+.hl-read {
+  position: absolute;
+  bottom: 8%;
+  right: 10%;
+  font-size: 0.875rem;
+  color: var(--text-3);
+  font-variant-numeric: lining-nums tabular-nums;
+  pointer-events: none;
+}
